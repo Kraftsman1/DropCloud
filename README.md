@@ -11,7 +11,7 @@
 
 ## About DropCloud
 
-This project is a Dropbox-like application built with Laravel and supports connecting to various external storage providers like AWS S3, Google Cloud Storage, Azure Blob Storage, and even self-hosted cloud servers.
+DropCloud is cloud storage application backend built with Laravel and supports connecting to various external storage providers like AWS S3, Google Cloud Storage, Azure Blob Storage, and even self-hosted cloud servers.
 
 ## Features
 
@@ -29,7 +29,7 @@ This project is a Dropbox-like application built with Laravel and supports conne
 - Database: PostgreSQL
 - File Synchronization: dropbox-sdk or nextcloud-client
 - Security: Encryption, OAuth2 authentication
-- User Interface: Blade templates, Laravel Jetstream (optional), Vue.js or React.js (optional)
+- User Interface: Nuxt.JS + Nuxt UI / Tailwind
 
 ## Development Roadmap
 
@@ -43,8 +43,6 @@ This project is a Dropbox-like application built with Laravel and supports conne
 - **[Laravel File Storage](https://laravel.com/docs/10.x/filesystem)**
 - **[Spatie Laravel Media Library](https://spatie.be/docs/laravel-medialibrary/v10/introduction)**
 - **[Flysystem](https://packagist.org/packages/league/flysystem)**
-- **[DC Blog - Build a Mini Dropbox Clone with Laravel Jetstream](https://codecourse.com/courses/create-a-mini-dropbox-clone-with-laravel-jetstream)**
-- **[Robson Sousa - Dropbox with Laravel](https://www.tutsmake.com/laravel-8-backup-store-on-dropbox-tutorial/)**
 
 ## Getting Started
 

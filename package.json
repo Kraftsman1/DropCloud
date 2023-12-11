@@ -1,4 +1,20 @@
 {
+    "name": "DropCloud",
+    "version": "0.0.1 alpha",
+    "author": "Asigri Shamsu-Deen Al-Heyr (Kraftsman)",
+    "description": "A cloud storage application built with Laravel and Nuxt.js",
+    "license": "MIT",
+    "repository": {
+        "type": "git",
+        "url": ""
+    },
+    "keywords": [
+        "laravel",
+        "nuxt",
+        "cloud",
+        "storage",
+        "dropcloud"
+    ],
     "private": true,
     "type": "module",
     "scripts": {
