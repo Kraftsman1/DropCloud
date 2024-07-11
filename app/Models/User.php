@@ -6,11 +6,17 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Laravel\Fortify\TwoFactorAuthenticatable;
+use Laravel\Jetstream\HasProfilePhoto;
 use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable
 {
-    use HasApiTokens, HasFactory, Notifiable;
+    use HasApiTokens;
+    use HasFactory;
+    use HasProfilePhoto;
+    use Notifiable;
+    use TwoFactorAuthenticatable;
 
     /**
      * The attributes that are mass assignable.
@@ -31,6 +37,8 @@ class User extends Authenticatable
     protected $hidden = [
         'password',
         'remember_token',
+        'two_factor_recovery_codes',
+        'two_factor_secret',
     ];
 
     /**
@@ -40,46 +48,14 @@ class User extends Authenticatable
      */
     protected $casts = [
         'email_verified_at' => 'datetime',
-        'password' => 'hashed',
     ];
 
     /**
-     * Get the files associated with the user.
+     * The accessors to append to the model's array form.
      *
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     * @var array<int, string>
      */
-    public function files()
-    {
-        return $this->hasMany(File::class);
-    }
-
-    /**
-     * Get the folders associated with the user.
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
-     */
-    public function folders()
-    {
-        return $this->hasMany(Folder::class);
-    }
-
-    /**
-     * Get the shares associated with the user.
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
-     */
-    public function share()
-    {
-        return $this->hasMany(Share::class);
-    }
-
-    /**
-     * Get the storage providers associated with the user.
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
-     */
-    public function storage_providers()
-    {
-        return $this->hasMany(StorageProvider::class);
-    }
+    protected $appends = [
+        'profile_photo_url',
+    ];
 }
