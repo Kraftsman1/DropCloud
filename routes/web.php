@@ -4,6 +4,8 @@ use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
+use App\Http\Controllers\StorageProviderController;
+
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -32,4 +34,9 @@ Route::middleware([
     Route::get('/dashboard', function () {
         return Inertia::render('Dashboard');
     })->name('dashboard');
+
+    Route::get('/storage-providers', [StorageProviderController::class, 'index'])->name('storage-providers.index');
+    Route::get('/storage-providers/create', [StorageProviderController::class, 'create'])->name('storage-providers.create');
+    
+
 });
