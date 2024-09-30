@@ -37,6 +37,11 @@ Route::middleware([
 
     Route::get('/storage-providers', [StorageProviderController::class, 'index'])->name('storage-providers.index');
     Route::get('/storage-providers/create', [StorageProviderController::class, 'create'])->name('storage-providers.create');
-    
+    Route::post('/storage-providers', [StorageProviderController::class, 'store'])->name('storage-providers.store');
+    Route::get('/storage-providers/{id}', [StorageProviderController::class, 'show'])->name('storage-providers.show');
+    Route::get('/storage-providers/{id}/edit', [StorageProviderController::class, 'edit'])->name('storage-providers.edit');
+    Route::put('/storage-providers/{id}', [StorageProviderController::class, 'update'])->name('storage-providers.update');
+    Route::delete('/storage-providers/{id}', [StorageProviderController::class, 'destroy'])->name('storage-providers.destroy');
+
 
 });
