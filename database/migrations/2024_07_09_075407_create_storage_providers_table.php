@@ -23,6 +23,7 @@ return new class extends Migration
          */
         Schema::create('storage_providers', function (Blueprint $table) {
             $table->id();
+            $table->string('label');
             $table->string('name');
             $table->longText('configuration');
             $table->timestamps();

@@ -18,13 +18,28 @@ class StorageProviderService
     {
         try {
             $storageProvider = new StorageProvider($data);
-            $storageProvider->save();
             
-            if ($storageProvider->testConnection()) {
+            // Check if save operation succeeded
+            if ($storageProvider->save()) {
+                
+                // Test connection after saving the provider
+                if ($storageProvider->testConnection()) {
+                    return [
+                        'success' => true,
+                        'message' => 'Storage provider saved and connection tested successfully.',
+                        'provider' => $storageProvider
+                    ];
+                } else {
+                    // Connection test failed
+                    return [
+                        'success' => false,
+                        'error' => 'Storage provider saved, but connection test failed.'
+                    ];
+                }
+            } else {
                 return [
-                    'success' => true,
-                    'message' => 'Storage provider saved and connection tested successfully.',
-                    'provider' => $storageProvider
+                    'success' => false,
+                    'error' => 'Failed to save storage provider.'
                 ];
             }
         } catch (ValidationException $e) {
@@ -92,6 +107,11 @@ class StorageProviderService
                     'message' => 'Storage provider updated and connection tested successfully.',
                     'provider' => $provider
                 ];
+            } else {
+                return [
+                    'success' => false,
+                    'error' => 'Storage provider updated, but connection test failed.'
+                ];
             }
         } catch (ModelNotFoundException $e) {
             return [
@@ -150,6 +170,11 @@ class StorageProviderService
                     'message' => 'Connection test successful.',
                     'provider' => $provider
                 ];
+            } else {
+                return [
+                    'success' => false,
+                    'error' => 'Connection test failed.'
+                ];
             }
         } catch (ModelNotFoundException $e) {
             return [
@@ -164,3 +189,5 @@ class StorageProviderService
         }
     }
 }
+
+?>

@@ -8,6 +8,10 @@ use Illuminate\Support\Facades\Facade;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Validation\ValidationException;
 use League\Flysystem\Filesystem;
+use League\Flysystem\AwsS3V3\AwsS3V3Adapter;
+use Aws\S3\S3Client;
+
+
 
 class StorageProvider extends Model
 {
@@ -53,11 +57,23 @@ class StorageProvider extends Model
     public function getFileSystem()
     {
         $config = $this->configuration;
-        $driver = $config['driver'];
+
+        if ($config['driver'] !== 's3') {
+            throw new \RuntimeException("Unsupported driver: {$config['driver']}");
+        }
 
         try {
-            $filesystem = Facade::getFacadeRoot()::make($driver, $config);
-            return $filesystem;
+            $client = new S3Client([
+                'credentials' => [
+                    'key'    => $config['key'],
+                    'secret' => $config['secret'],
+                ],
+                'region' => $config['region'],
+                'version' => 'latest',
+            ]);
+
+            $adapter = new AwsS3V3Adapter($client, $config['bucket'], $config['prefix'] ?? '');
+            return new Filesystem($adapter);
         } catch (\Exception $e) {
             throw new \RuntimeException("Failed to create filesystem: " . $e->getMessage());
         }
@@ -138,10 +154,11 @@ class StorageProvider extends Model
     {
         try {
             $filesystem = $this->getFileSystem();
-            $filesystem->listContents('');
+            $filesystem->write('test.txt', 'Connection Test');
+            $filesystem->delete('test.txt');
             return true;
         } catch (\Exception $e) {
-            throw new \RuntimeException("Connection test failed: " . $e->getMessage());
+            throw new \RuntimeException("Connection test failed : " . $e->getMessage());
         }
     }
 
