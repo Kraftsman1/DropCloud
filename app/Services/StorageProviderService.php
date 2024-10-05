@@ -21,21 +21,11 @@ class StorageProviderService
             
             // Check if save operation succeeded
             if ($storageProvider->save()) {
-                
-                // Test connection after saving the provider
-                if ($storageProvider->testConnection()) {
-                    return [
-                        'success' => true,
-                        'message' => 'Storage provider saved and connection tested successfully.',
-                        'provider' => $storageProvider
-                    ];
-                } else {
-                    // Connection test failed
-                    return [
-                        'success' => false,
-                        'error' => 'Storage provider saved, but connection test failed.'
-                    ];
-                }
+                return [
+                    'success' => true,
+                    'message' => 'Storage provider saved successfully.',
+                    // 'provider' => $storageProvider->toArray()
+                ];
             } else {
                 return [
                     'success' => false,
@@ -99,18 +89,17 @@ class StorageProviderService
         try {
             $provider = StorageProvider::findOrFail($id);
             $provider->fill($data);
-            $provider->save();
 
-            if ($provider->testConnection()) {
+            if ($provider->save()) {
                 return [
                     'success' => true,
-                    'message' => 'Storage provider updated and connection tested successfully.',
-                    'provider' => $provider
+                    'message' => 'Storage provider updated successfully.',
+                    // 'provider' => $storageProvider->toArray()
                 ];
             } else {
                 return [
                     'success' => false,
-                    'error' => 'Storage provider updated, but connection test failed.'
+                    'error' => 'Failed to update storage provider.'
                 ];
             }
         } catch (ModelNotFoundException $e) {
