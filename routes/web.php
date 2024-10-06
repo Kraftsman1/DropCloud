@@ -37,6 +37,7 @@ Route::middleware([
 
     Route::get('/storage-providers', [StorageProviderController::class, 'index'])->name('storage-providers.index');
     Route::get('/storage-providers/create', [StorageProviderController::class, 'create'])->name('storage-providers.create');
+    Route::post('/storage-providers/test-connection', [StorageProviderController::class, 'testConnection'])->name('storage-providers.test-connection');
     Route::post('/storage-providers', [StorageProviderController::class, 'store'])->name('storage-providers.store');
     Route::get('/storage-providers/{id}', [StorageProviderController::class, 'show'])->name('storage-providers.show');
     Route::get('/storage-providers/{id}/edit', [StorageProviderController::class, 'edit'])->name('storage-providers.edit');
