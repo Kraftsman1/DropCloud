@@ -45,6 +45,49 @@ class StorageProviderService
         }
     }
 
+
+    /**
+     * Tests the connection to a storage provider.
+     *
+     * @param \Illuminate\Http\Request $request The request containing provider details.
+     * 
+     * @return array An array containing the success status, message, and provider instance if successful,
+     *               or an error message if the connection test fails.
+     * 
+     * @throws \Illuminate\Validation\ValidationException If validation fails.
+     * @throws \RuntimeException If the connection test fails due to a runtime exception.
+     */
+    public function testConnection(array $data) 
+    {
+        try {
+            // Create a temporary storage provider instance
+            $storageProvider = new StorageProvider($data);
+
+            if ($storageProvider->testConnection()) {
+                return [
+                    'success' => true,
+                    'message' => 'Connection test successful.',
+                    'provider' => $storageProvider
+                ];
+            } else {
+                return [
+                    'success' => false,
+                    'error' => 'Connection test failed.'
+                ];
+            }
+        } catch (ValidationException $e) {
+            return [
+                'success' => false,
+                'error' => 'Validation failed: ' . $e->getMessage()
+            ];
+        } catch (\RuntimeException $e) {
+            return [
+                'success' => false,
+                'error' => 'Connection test failed: ' . $e->getMessage()
+            ];
+        }
+    }
+
     /**
      * Get all storage providers.
      *
@@ -149,34 +192,34 @@ class StorageProviderService
      * @param int $id
      * @return array
      */
-    public function testConnection($id)
-    {
-        try {
-            $provider = StorageProvider::findOrFail($id);
-            if ($provider->testConnection()) {
-                return [
-                    'success' => true,
-                    'message' => 'Connection test successful.',
-                    'provider' => $provider
-                ];
-            } else {
-                return [
-                    'success' => false,
-                    'error' => 'Connection test failed.'
-                ];
-            }
-        } catch (ModelNotFoundException $e) {
-            return [
-                'success' => false,
-                'error' => 'Storage provider not found.'
-            ];
-        } catch (\RuntimeException $e) {
-            return [
-                'success' => false,
-                'error' => 'Connection test failed: ' . $e->getMessage()
-            ];
-        }
-    }
+    // public function testConnection($id)
+    // {
+    //     try {
+    //         $provider = StorageProvider::findOrFail($id);
+    //         if ($provider->testConnection()) {
+    //             return [
+    //                 'success' => true,
+    //                 'message' => 'Connection test successful.',
+    //                 'provider' => $provider
+    //             ];
+    //         } else {
+    //             return [
+    //                 'success' => false,
+    //                 'error' => 'Connection test failed.'
+    //             ];
+    //         }
+    //     } catch (ModelNotFoundException $e) {
+    //         return [
+    //             'success' => false,
+    //             'error' => 'Storage provider not found.'
+    //         ];
+    //     } catch (\RuntimeException $e) {
+    //         return [
+    //             'success' => false,
+    //             'error' => 'Connection test failed: ' . $e->getMessage()
+    //         ];
+    //     }
+    // }
 }
 
 ?>

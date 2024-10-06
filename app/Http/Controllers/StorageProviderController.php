@@ -169,15 +169,13 @@ class StorageProviderController extends Controller
      * @param int $id The ID of the storage provider to test.
      * @return \Inertia\Response The response containing the result message and provider details.
      */
-    public function testConnection($id)
+    public function testConnection(Request $request)
     {
-        $result = $this->storageProviderService->testConnection($id);
-
-        // return response()->json($result, $result['success'] ? 200 : 500);
-        
+        $result = $this->storageProviderService->testConnection($request);
+    
         return Inertia::render('StorageProviders/Show', [
-            'message' => $result['success'] ? 'Connection test successful.' : 'Connection test failed.',
-            'provider' => $this->storageProviderService->getProvider($id)
+            'message' => $result['success'] ? 'Connection test successful.' : 'Connection test failed: ' . ($result['error'] ?? ''),
+            'provider' => $result['success'] ? $result['provider'] : null
         ]);
     }
 
