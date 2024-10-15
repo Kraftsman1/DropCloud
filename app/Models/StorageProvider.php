@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Facade;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Validation\ValidationException;
+use Illuminate\Support\Facades\Log;
 use League\Flysystem\Filesystem;
 use League\Flysystem\AwsS3V3\AwsS3V3Adapter;
 use Aws\S3\S3Client;
@@ -156,6 +157,9 @@ class StorageProvider extends Model
             $filesystem->delete('test.txt');
             return true;
         } catch (\Exception $e) {
+            Log::error('Connection test failed', [
+                'exception' => $e,
+            ]);
             throw new \RuntimeException("Connection test failed : " . $e->getMessage());
         }
     }

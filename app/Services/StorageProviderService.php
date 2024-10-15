@@ -83,7 +83,7 @@ class StorageProviderService
         } catch (\RuntimeException $e) {
             return [
                 'success' => false,
-                'error' => 'Connection test failed: ' . $e->getMessage()
+                'error' => $e->getMessage()
             ];
         }
     }
