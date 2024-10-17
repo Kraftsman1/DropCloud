@@ -28,52 +28,34 @@ const filters = ref([
 
 <template>
     <AppLayout title="File Manager">
-        <template #header>
-            <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-800 leading-tight">
-                File Manager
-            </h2>
-        </template>
-
-        <div class="py-12">
-            <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-                <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-xl sm:rounded-lg">
-                    <div class="p-6 lg:p-8 text-gray-900 dark:text-gray-100">
-                        <nav class="text-sm mb-4">
-                            <Link :href="route('dashboard')" class="text-blue-400">
-                                <HomeIcon class="inline mr-2" />
-                            </Link>
-                            / File manager / Work stuff 2022
-                        </nav>
-
-                        <div class="flex justify-between items-center mb-4">
-                            <h2 class="text-xl font-semibold">Folders</h2>
-                            <div>
-                                <button class="px-3 py-1 bg-gray-200 dark:bg-gray-700 rounded-md mr-2">Sort</button>
-                                <button class="px-3 py-1 bg-gray-200 dark:bg-gray-700 rounded-md mr-2">View</button>
-                                <button class="px-3 py-1 bg-blue-600 text-white rounded-md">+ Create</button>
-                            </div>
-                        </div>
-                        
-                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-                            <div v-for="folder in folders" :key="folder.id" class="bg-gray-100 dark:bg-gray-700 p-4 rounded-lg">
-                                <component :is="folder.icon" class="w-12 h-12 mb-2" />
-                                <h3 class="font-semibold">{{ folder.name }}</h3>
-                                <p class="text-sm text-gray-600 dark:text-gray-400">{{ folder.fileCount }} · {{ folder.size }}</p>
-                            </div>
-                        </div>
-
-                        <h2 class="text-xl font-semibold mb-4">Files</h2>
-                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                            <div v-for="file in files" :key="file.id" class="bg-gray-100 dark:bg-gray-700 p-4 rounded-lg">
-                                <img v-if="file.type === 'image'" :src="file.preview" :alt="file.name" class="w-full h-32 object-cover rounded mb-2">
-                                <component v-else :is="file.icon" class="w-12 h-12 mb-2" />
-                                <h3 class="font-semibold truncate">{{ file.name }}</h3>
-                                <p class="text-sm text-gray-600 dark:text-gray-400">{{ file.size }}</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+        <div class="flex h-screen bg-gray-100">
+    <!-- Sidebar -->
+        <aside class="w-64 bg-white shadow-md">
+        <div class="p-4">
+            <img src="/path-to-dropbox-logo.svg" alt="Dropbox" class="w-32">
         </div>
+        <nav class="mt-8">
+            <a href="#" class="flex items-center px-4 py-2 text-blue-600 bg-blue-100">
+            <i class="fas fa-home mr-3"></i>
+            Home
+            </a>
+            <a href="#" class="flex items-center px-4 py-2 text-gray-700 hover:bg-gray-100">
+            <i class="fas fa-file mr-3"></i>
+            My Files
+            </a>
+            <!-- Add other menu items similarly -->
+        </nav>
+        <div class="absolute bottom-0 left-0 w-64 p-4">
+            <div class="mb-2">
+            <div class="text-sm text-gray-600">75% In-use</div>
+            <div class="w-full bg-gray-200 rounded-full h-2.5">
+                <div class="bg-blue-600 h-2.5 rounded-full" style="width: 75%"></div>
+            </div>
+            </div>
+            <div class="text-xs text-gray-500">600GB of 800GB</div>
+            <button class="mt-2 w-full bg-blue-600 text-white py-2 rounded-md">Upgrade</button>
+        </div>
+    </aside>
+</div>
     </AppLayout>
 </template>
