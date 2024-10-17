@@ -64,7 +64,7 @@ const filters = ref([
                 <header class="flex justify-between items-center mb-8">
                     <div>
                         <h1 class="text-2xl font-bold text-gray-800">My Cloud</h1>
-                        <p class="text-gray-600">Welcome, James Alto! 👋</p>
+                        <p class="text-gray-600">Welcome, Deen! 👋</p>
                     </div>
                     <div class="flex items-center space-x-4">
                         <input type="text" placeholder="Search anything here" class="px-4 py-2 border rounded-md">
@@ -77,6 +77,79 @@ const filters = ref([
                         <img src="/path-to-profile-picture.jpg" alt="Profile" class="w-10 h-10 rounded-full">
                     </div>
                 </header>
+
+                <section>
+                    <div class="flex justify-between items-center mb-4">
+                        <h2 class="text-xl font-semibold">All files</h2>
+                        <button class="px-4 py-2 bg-blue-100 text-blue-600 rounded-md">+ Add new</button>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <!-- Repeat this card for each folder -->
+                        <div class="bg-white p-4 rounded-lg shadow">
+                            <div class="flex justify-between items-center mb-4">
+                                <div class="flex items-center">
+                                    <i class="fas fa-folder text-blue-500 mr-2"></i>
+                                    <span class="font-medium">Documents</span>
+                                </div>
+                                <button class="text-gray-400 hover:text-gray-600">
+                                    <i class="fas fa-ellipsis-v"></i>
+                                </button>
+                            </div>
+                            <div class="flex justify-between text-sm text-gray-600">
+                                <div>
+                                    <span>Shared Users</span>
+                                    <div class="flex -space-x-2 overflow-hidden mt-1">
+                                        <!-- Repeat for each user avatar -->
+                                        <img class="inline-block h-6 w-6 rounded-full ring-2 ring-white"
+                                            src="/path-to-avatar.jpg" alt="">
+                                    </div>
+                                </div>
+                                <div>
+                                    <span>Inside Files</span>
+                                    <p class="text-blue-500 font-medium mt-1">3,985</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="mt-8">
+                    <h2 class="text-xl font-semibold mb-4">Recent Files</h2>
+                    <table class="w-full">
+                        <thead>
+                            <tr class="text-left text-gray-600 border-b">
+                                <th class="pb-2">Name</th>
+                                <th class="pb-2">Shared Users</th>
+                                <th class="pb-2">File Size</th>
+                                <th class="pb-2">Last Modified</th>
+                                <th class="pb-2"></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Repeat this row for each recent file -->
+                            <tr class="border-b">
+                                <td class="py-3 flex items-center">
+                                    <i class="fas fa-file-image text-orange-500 mr-2"></i>
+                                    Website Design.png
+                                </td>
+                                <td>
+                                    <div class="flex -space-x-2 overflow-hidden">
+                                        <!-- Repeat for each user avatar -->
+                                        <img class="inline-block h-6 w-6 rounded-full ring-2 ring-white"
+                                            src="/path-to-avatar.jpg" alt="">
+                                    </div>
+                                </td>
+                                <td>2.8 MB</td>
+                                <td>Dec 13, 2022</td>
+                                <td>
+                                    <button class="text-gray-400 hover:text-gray-600">
+                                        <i class="fas fa-ellipsis-v"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </section>
 
             </main>
 
