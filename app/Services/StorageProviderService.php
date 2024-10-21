@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\StorageProvider;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Support\Facades\Log;
 
 class StorageProviderService
 {
@@ -63,27 +64,31 @@ class StorageProviderService
             // Create a temporary storage provider instance
             $storageProvider = new StorageProvider($data);
 
-            if ($storageProvider->testConnection()) {
-                return [
-                    'success' => true,
-                    'message' => 'Connection test successful.',
-                    'provider' => $storageProvider
-                ];
-            } else {
-                return [
-                    'success' => false,
-                    'error' => 'Connection test failed.'
-                ];
-            }
-        } catch (ValidationException $e) {
+            // Validate the storage provider configuration
+            $storageProvider->validateConfiguration($data);
+
+            // Test the connection (will throw exceptions on failure)
+            $storageProvider->testConnection();
+
+            // Return success response
             return [
-                'success' => false,
-                'error' => 'Validation failed: ' . $e->getMessage()
+                'success' => true,
+                'message' => 'Connection test successful.',
+                'provider' => $storageProvider,
             ];
         } catch (\RuntimeException $e) {
+            // Log and return runtime error
+            Log::error('Runtime error during connection test', ['error' => $e->getMessage()]);
             return [
                 'success' => false,
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
+            ];
+        } catch (\Exception $e) {
+            // Fallback for any other unexpected errors
+            Log::error('Unexpected error during connection test', ['error' => $e->getMessage()]);
+            return [
+                'success' => false,
+                'error' => 'An unexpected error occurred: ' . $e->getMessage(),
             ];
         }
     }
