@@ -171,10 +171,13 @@ class StorageProviderController extends Controller
      */
     public function testConnection(Request $request)
     {
-        $result = $this->storageProviderService->testConnection($request);
-    
-        return Inertia::render('StorageProviders/Show', [
-            'message' => $result['success'] ? 'Connection test successful.' : 'Connection test failed: ' . ($result['error'] ?? ''),
+        $data = $request->all();
+        $result = $this->storageProviderService->testConnection($data);
+
+        return response()->json( [
+            'message' => $result['success'] 
+            ? 'Connection test successful.'
+            : ($result['error'] ?? 'Unknown Error'),
             'provider' => $result['success'] ? $result['provider'] : null
         ]);
     }
