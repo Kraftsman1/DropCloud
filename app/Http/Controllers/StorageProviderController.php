@@ -175,10 +175,10 @@ class StorageProviderController extends Controller
         $result = $this->storageProviderService->testConnection($data);
 
         return response()->json( [
+            'success' => $result['success'],
             'message' => $result['success'] 
             ? 'Connection test successful.'
             : ($result['error'] ?? 'Unknown Error'),
-            'provider' => $result['success'] ? $result['provider'] : null
         ]);
     }
 

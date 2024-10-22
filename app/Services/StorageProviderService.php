@@ -68,7 +68,7 @@ class StorageProviderService
             $storageProvider->validateConfiguration($data);
 
             // Test the connection (will throw exceptions on failure)
-            $storageProvider->testConnection();
+            $storageProvider->testConnection($data);
 
             // Return success response
             return [

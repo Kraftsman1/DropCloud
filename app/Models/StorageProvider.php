@@ -53,9 +53,9 @@ class StorageProvider extends Model
      *
      * @return Filesystem
      */
-    public function getFileSystem()
+    public function getFileSystem(array $data = null)
     {
-        $config = $this->configuration;
+        $config = $data ?? $this->configuration;
 
         if ($config['driver'] !== 's3') {
             throw new \RuntimeException("Unsupported driver: {$config['driver']}");
@@ -91,9 +91,9 @@ class StorageProvider extends Model
      *
      * @return void
      */
-    public function validateConfiguration()
+    public function validateConfiguration(array $data = null)
     {
-        $config = $this->configuration;
+        $config = $data ?? $this->configuration;
 
         if (!isset($config['driver'])) {
             throw ValidationException::withMessages(['driver' => 'Driver is required']);
@@ -149,10 +149,10 @@ class StorageProvider extends Model
      *
      * @return bool
      */
-    public function testConnection()
+    public function testConnection(array $data)
     {
         try {
-            $filesystem = $this->getFileSystem();
+            $filesystem = $this->getFileSystem($data);
             $filesystem->write('test.txt', 'Connection Test');
             $filesystem->delete('test.txt');
             return true;
