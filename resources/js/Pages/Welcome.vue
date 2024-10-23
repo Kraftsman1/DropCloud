@@ -32,7 +32,7 @@ const features = [
 </script>
 
 <template>
-    <Head title="Welcome" />
+    <Head title="Store, share, collaborate and more" />
 
     <div class="relative min-h-screen bg-dots-darker bg-center bg-gray-100 dark:bg-dots-lighter dark:bg-gray-900 selection:bg-red-500 selection:text-white">
         <!-- Navigation -->
@@ -104,5 +104,60 @@ const features = [
                 </div>
             </div>
         </div>
+                <!-- Testimonial Section -->
+        <section class="px-6 py-16 bg-gray-50">
+            <div class="max-w-7xl mx-auto">
+                <h2 class="text-3xl font-bold mb-12">What our customers are saying</h2>
+                <div class="grid md:grid-cols-2 gap-8">
+                    <div class="bg-orange-500 p-12 rounded-lg flex items-center justify-center">
+                        <img src="/topps-logo.svg" alt="Topps" class="h-16" />
+                    </div>
+                    <div class="flex flex-col justify-center">
+                        <blockquote class="text-xl mb-4">
+                            "We've always been a pioneer in the card industry, and we think of ourselves in the same way in the digital space. Thankfully, we pretty much have three words internally that keep us creating great work: 'It's on Dropbox.'"
+                        </blockquote>
+                        <cite class="text-gray-600">
+                            John Doe, VP - Engineering @Dropbox
+                        </cite>
+                        
+                    </div>
+                </div>
+            </div>
+        </section>
+
+                <!-- Footer -->
+        <footer class="bg-black text-white px-6 py-16">
+            <div class="max-w-7xl mx-auto grid md:grid-cols-4 gap-8">
+                <div>
+                    <h3 class="font-bold mb-4">DropCloud</h3>
+                    <ul class="space-y-2">
+                        <li><Link href="#" class="hover:text-gray-300">Desktop app</Link></li>
+                        <li><Link href="#" class="hover:text-gray-300">Mobile app</Link></li>
+                        <li><Link href="#" class="hover:text-gray-300">Features</Link></li>
+                        <li><Link href="#" class="hover:text-gray-300">Security</Link></li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h3 class="font-bold mb-4">Products</h3>
+                    <ul class="space-y-2">
+                        <li><Link href="#" class="hover:text-gray-300">Plus</Link></li>
+                        <li><Link href="#" class="hover:text-gray-300">Professional</Link></li>
+                        <li><Link href="#" class="hover:text-gray-300">Business</Link></li>
+                        <li><Link href="#" class="hover:text-gray-300">Enterprise</Link></li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h3 class="font-bold mb-4">Support</h3>
+                    <ul class="space-y-2">
+                        <li><Link href="#" class="hover:text-gray-300">Help center</Link></li>
+                        <li><Link href="#" class="hover:text-gray-300">Contact us</Link></li>
+                        <li><Link href="#" class="hover:text-gray-300">Privacy & terms</Link></li>
+                        <li><Link href="#" class="hover:text-gray-300">Cookie policy</Link></li>
+                    </ul>
+                </div>
+            </div>
+        </footer>  
     </div>
 </template>
