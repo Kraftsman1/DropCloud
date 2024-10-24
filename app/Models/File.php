@@ -4,53 +4,94 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class File extends Model
 {
     use HasFactory;
+    use SoftDeletes;
 
-        /**
+    /**
      * The attributes that are mass assignable.
      *
-     * @var array<int, string>
+     * @var array
      */
     protected $fillable = [
+        'storage_provider_id',
         'name',
-        'size',
-        'mime_type',
         'path',
+        'mime_type',
+        'size',
         'user_id',
+        'metadata',
         'folder_id',
     ];
 
     /**
-     * Get the owner of the file.
+     * The attributes that should be cast.
+     *
+     * @var array<int, string>
+     */
+    protected $casts = [
+        'metadata' => 'array',
+        'size' => 'integer',
+    ];
+
+    /**
+     * Get the storage provider that the file belongs to.
+     */
+    public function storageProvider()
+    {
+        return $this->belongsTo(StorageProvider::class);
+    }
+
+    /**
+     * Get the user that owns the file.
+     *
+     * This function defines an inverse one-to-many relationship
+     * between the File model and the User model.
      *
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
-    public function owner()
+    public function user()
     {
         return $this->belongsTo(User::class);
     }
-
+    
     /**
-     * Get the folder that the file belongs to.
+     * Scope a query to only include files of a given type.
      *
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     * @param \Illuminate\Database\Eloquent\Builder $query
+     * @param string $type
+     * @return \Illuminate\Database\Eloquent\Builder
      */
-    public function folder()
+    public function scopeOfTypes($query, $type)
     {
-        return $this->belongsTo(Folder::class);
+        return $query->where('mime_type', 'LIKE', $type . '%');
     }
 
     /**
-     * Get the shares associated with the file.
+     * Get the URL attribute for the file.
      *
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     * This method generates a temporary URL for the file if a storage provider is set.
+     * It uses the FileManagerService to get the temporary URL.
+     *
+     * @return string|null The temporary URL of the file or null if no storage provider is set or an error occurs.
      */
-    public function shares()
+    public function getUrlAttribute()
     {
-        return $this->hasMany(Share::class, 'file_id');
+        if (!$this->storage_provider_id) {
+            return null;
+        }
+
+        $fileManager = app(FileManagerService::class);
+        $fileManager->setProvider($this->storageProvider);
+
+        try {
+            return $fileManager->getTemporaryUrl($this->path);
+        } catch (\Exception $e) {
+            return null;
+        }
     }
 
 }
