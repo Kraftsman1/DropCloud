@@ -57,6 +57,18 @@ class FileManagerService
         }
     }
 
+    /**
+     * Download a file from the filesystem.
+     *
+     * @param string $path The path to the file to be downloaded.
+     * 
+     * @return array An associative array containing:
+     *               - 'stream': The file stream.
+     *               - 'mime_type': The MIME type of the file.
+     *               - 'size': The size of the file in bytes.
+     * 
+     * @throws \RuntimeException If the file does not exist or if there is an error during the download process.
+     */
     public function downloadFile(string $path) 
     {
         try {
@@ -74,7 +86,33 @@ class FileManagerService
         }
     }
 
-    
+    /**
+     * Deletes a file or directory at the specified path.
+     *
+     * This method attempts to delete a file if it exists at the given path.
+     * If the path points to a directory, it will attempt to delete the directory.
+     * If neither a file nor a directory exists at the path, an exception is thrown.
+     *
+     * @param string $path The path to the file or directory to be deleted.
+     * @return array An array containing a success key with a boolean value.
+     * @throws \RuntimeException If the path does not exist or if the deletion fails.
+     */
+    public function delete(string $path)
+    {
+        try {
+            if ($this->filesystem->fileExists($path)) {
+                $this->filesystem->delete($path);
+            } elseif ($this->filesystem->directoryExists($path)) {
+                $this->filesystem->deleteDirectory($path);
+            } else {
+                throw new \RuntimeException("Path not found: {$path}");
+            }
+
+            return ['success' => true];
+        } catch (\Exception $e) {
+            throw new \RuntimeException("Failed to delete: {$e->getMessage()}");
+        }
+    }
 
 }
 
