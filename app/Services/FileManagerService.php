@@ -114,6 +114,36 @@ class FileManagerService
         }
     }
 
+    /**
+     * Retrieves metadata for a given file path.
+     *
+     * This method attempts to gather various metadata attributes for the specified file path,
+     * including MIME type, file size, last modified timestamp, and visibility status.
+     *
+     * @param string $path The path to the file for which metadata is being retrieved.
+     * 
+     * @return array An associative array containing the following keys:
+     *               - 'mime_type': The MIME type of the file.
+     *               - 'size': The size of the file in bytes.
+     *               - 'last_modified': The last modified timestamp of the file.
+     *               - 'visibility': The visibility status of the file.
+     * 
+     * @throws \RuntimeException If an error occurs while retrieving the metadata.
+     */
+    public function getMetadata(string $path)
+    {
+        try {
+            return [
+                'mime_type' => $this->filesystem->mimeType($path),
+                'size' => $this->filesystem->fileSize($path),
+                'last_modified' => $this->filesystem->lastModified($path),
+                'visibility' => $this->filesystem->visibility($path),
+            ];
+        } catch (\Exception $e) {
+            throw new \RuntimeException("Failed to get metadata: {$e->getMessage()}");
+        }
+    }
+
 }
 
 ?>
