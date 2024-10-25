@@ -57,6 +57,25 @@ class FileManagerService
         }
     }
 
+    public function downloadFile(string $path) 
+    {
+        try {
+            if (!$this->filesystem->fileExists($path)) {
+                throw new \RuntimeException("File not found: {$path}");
+            }
+
+            return [
+                'stream' => $this->filesystem->readStream($path),
+                'mime_type' => $this->filesystem->mimeType($path),
+                'size' => $this->filesystem->fileSize($path),
+            ];
+        } catch (\Exception $e) {
+            throw new \RuntimeException("Failed to download file: {$e->getMessage()}");
+        }
+    }
+
+    
+
 }
 
 ?>
