@@ -115,4 +115,47 @@ class FileManagerController extends Controller
         }
     }
 
+    /**
+     * Delete a file from the storage provider.
+     *
+     * @param \Illuminate\Http\Request $request
+     * @return \Illuminate\Http\JsonResponse
+     *
+     * This method retrieves the provider ID and path from the request, finds the corresponding
+     * storage provider, and deletes the file specified by the path. If the provider is not found,
+     * it returns a 404 error response. If an exception occurs during the deletion, it returns a 500
+     * error response with the exception message.
+     *
+     * @throws \RuntimeException If an error occurs while deleting the file.
+     */
+    public function delete(Request $request)
+    {
+        $providerId = $request->input('provider_id');
+        $path = $request->input('path');
+
+        $provider = StorageProvider::find($providerId);
+
+        if (!$provider) {
+            return response()->json([
+                'success' => false,
+                'error' => 'Storage provider not found.',
+            ], 404);
+        }
+
+        $this->fileManagerService->setProvider($provider);
+
+        try {
+            $this->fileManagerService->deleteFile($path);
+            return response()->json([
+                'success' => true,
+                'message' => 'File deleted successfully.',
+            ]);
+        } catch (\RuntimeException $e) {
+            return response()->json([
+                'success' => false,
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
 }
