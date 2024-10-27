@@ -158,4 +158,48 @@ class FileManagerController extends Controller
         }
     }
 
+    /**
+     * Upload a file to the storage provider.
+     *
+     * @param \Illuminate\Http\Request $request
+     * @return \Illuminate\Http\JsonResponse
+     *
+     * This method retrieves the provider ID and file from the request, finds the corresponding
+     * storage provider, and uploads the file to the specified path. If the provider is not found,
+     * it returns a 404 error response. If an exception occurs during the upload, it returns a 500
+     * error response with the exception message.
+     *
+     * @throws \RuntimeException If an error occurs while uploading the file.
+     */
+    public function upload(Request $request)
+    {
+        $providerId = $request->input('provider_id');
+        $file = $request->file('file');
+        $path = $request->input('path', '');
+
+        $provider = StorageProvider::find($providerId);
+
+        if (!$provider) {
+            return response()->json([
+                'success' => false,
+                'error' => 'Storage provider not found.',
+            ], 404);
+        }
+
+        $this->fileManagerService->setProvider($provider);
+
+        try {
+            $this->fileManagerService->uploadFile($file, $path);
+            return response()->json([
+                'success' => true,
+                'message' => 'File uploaded successfully.',
+            ]);
+        } catch (\RuntimeException $e) {
+            return response()->json([
+                'success' => false,
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
 }
