@@ -58,6 +58,52 @@ class FileManagerService
     }
 
     /**
+     * Uploads a file to the specified path with optional metadata and visibility settings.
+     *
+     * @param \Illuminate\Http\UploadedFile $file The file to be uploaded.
+     * @param string $path The destination path where the file should be uploaded.
+     * @param array $options Optional settings for the upload:
+     *                       - 'filename' (string): Custom filename for the uploaded file.
+     *                       - 'visibility' (string): Visibility setting for the file (default: 'private').
+     * @return array An array containing the success status, file path, and metadata.
+     * @throws \RuntimeException If the file upload fails.
+     */
+    public function uploadFile($file, string $path, array $options = [])
+    {
+        try {
+            $stream = fopen($file->getRealPath(), 'r+');
+            $filename = $options['filename'] ?? $file->getClientOriginalName();
+            $fullPath = trim($path . '/' . $filename, '/');
+
+            // Generate metadata
+            $metadata = [
+                'mime_type' => $file->getMimeType(),
+                'size' => $file->getSize(),
+                'original_name' => $file->getClientOriginalName(),
+                'uploaded_at' => now(),
+            ];
+
+            // Upload file with metadata
+            $this->filesystem->writeStream($fullPath, $stream, [
+                'metadata' => $metadata,
+                'visibility' => $options['visibility'] ?? 'private'
+            ]);
+
+            if (is_resource($stream)) {
+                fclose($stream);
+            }
+
+            return [
+                'success' => true,
+                'path' => $fullPath,
+                'metadata' => $metadata
+            ];
+        } catch (\Exception $e) {
+            throw new \RuntimeException("Failed to upload file: {$e->getMessage()}");
+        }
+    }
+
+    /**
      * Download a file from the filesystem.
      *
      * @param string $path The path to the file to be downloaded.
