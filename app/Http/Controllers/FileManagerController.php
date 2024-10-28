@@ -5,7 +5,9 @@ namespace App\Http\Controllers;
 use App\Models\File;
 use App\Models\StorageProvider;
 use App\Services\FileManagerService;
+
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class FileManagerController extends Controller
 {
@@ -67,6 +69,8 @@ class FileManagerController extends Controller
                 'contents' => $contents,
             ]);
         } catch (\RuntimeException $e) {
+            // Log the error message for debugging
+            Log::error('Failed to list the contents: ' . $e->getMessage(), ['exception' => $e]);
             return response()->json([
                 'success' => false,
                 'error' => $e->getMessage(),
