@@ -28,34 +28,38 @@ class FileManagerController extends Controller
     }
 
     /**
-     * Display a listing of the files and directories.
+     * Display a listing of the files from the storage provider.
      *
-     * @param \Illuminate\Http\Request $request
-     * @return \Illuminate\Http\JsonResponse
+     * @param \Illuminate\Http\Request $request The HTTP request instance.
+     * @param \App\Models\StorageProvider|null $provider The storage provider instance (optional).
+     * @return \Illuminate\Http\JsonResponse The JSON response containing the list of files or an error message.
      *
-     * This method retrieves the provider ID and path from the request, finds the corresponding
-     * storage provider, and lists the contents of the specified path. If the provider is not found,
-     * it returns a 404 error response. If an exception occurs during the listing of contents, it
-     * returns a 500 error response with the exception message.
-     *
-     * @throws \RuntimeException If an error occurs while listing the contents.
+     * This method retrieves all available storage providers for the authenticated user.
+     * If no specific provider is specified, it uses the first available provider.
+     * It then sets the provider in the file manager service and attempts to list the contents
+     * of the specified path. If the provider is not found, it returns a 404 response.
+     * If an error occurs while listing the contents, it returns a 500 response with the error message.
      */
-    public function index(Request $request)
+    public function index(Request $request, StorageProvider $provider = null)
     {
-        $providerId = $request->input('provider_id');
-        $path = $request->input('path', '');
-
-        $provider = StorageProvider::find($providerId);
-
-        if (!$provider) {
+        // Get all available storage providers
+        $providers = auth()->user()->storageProviders;
+    
+        // Use the first provider if none is specified
+        $activeProvider = $provider ?? $providers->first();
+    
+        // Check if active provider exists, if not return 404 response
+        if (!$activeProvider) {
             return response()->json([
                 'success' => false,
                 'error' => 'Storage provider not found.',
             ], 404);
         }
-
-        $this->fileManagerService->setProvider($provider);
-
+    
+        // Set provider and list files
+        $this->fileManagerService->setProvider($activeProvider);
+        $path = $request->input('path', '');
+    
         try {
             $contents = $this->fileManagerService->listContents($path);
             return response()->json([
@@ -69,6 +73,7 @@ class FileManagerController extends Controller
             ], 500);
         }
     }
+    
 
     /**
      * Download a file from the storage provider.
