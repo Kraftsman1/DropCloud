@@ -112,6 +112,8 @@ class FileManagerController extends Controller
             $file = $this->fileManagerService->downloadFile($path);
             return response()->streamDownload(function () use ($file) {
                 fpassthru($file['stream']);
+                // ensure stream is closed after download
+                fclose($file['stream']);
             }, basename($path), [
                 'Content-Type' => $file['mime_type'],
                 'Content-Length' => $file['size'],
