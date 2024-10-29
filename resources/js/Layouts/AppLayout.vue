@@ -274,9 +274,107 @@ const logout = () => {
             </nav>
 
             <!-- Page Heading -->
-            <header v-if="$slots.header" class="bg-white shadow">
-                <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-                    <slot name="header" />
+            <header class="bg-white shadow">
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <h1 class="text-2xl font-bold text-gray-800">My Cloud</h1>
+                            <p class="text-gray-600">Welcome, {{ $page.props.auth.user.name }}! 👋</p>
+                        </div>
+                        <div class="flex items-center space-x-4">
+                            <div class="relative">
+                                <input 
+                                    type="text" 
+                                    v-model="searchQuery"
+                                    placeholder="Search anything here" 
+                                    class="px-4 py-2 border rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                                    @keyup.enter="handleSearch"
+                                >
+                            </div>
+
+                            <!-- Notifications -->
+                            <Dropdown align="right" width="48">
+                                <template #trigger>
+                                    <button class="p-2 text-gray-600 hover:bg-gray-100 rounded-full relative">
+                                        <BellIcon class="w-6 h-6" />
+                                        <!-- Optional: Add notification badge -->
+                                        <span class="absolute top-0 right-0 block h-2 w-2 rounded-full bg-red-400 ring-2 ring-white"></span>
+                                    </button>
+                                </template>
+
+                                <template #content>
+                                    <div class="block px-4 py-2 text-xs text-gray-400">
+                                        Notifications
+                                    </div>
+                                    <!-- Add your notifications list here -->
+                                    <div class="border-t border-gray-200">
+                                        <DropdownLink as="button">
+                                            View All Notifications
+                                        </DropdownLink>
+                                    </div>
+                                </template>
+                            </Dropdown>
+
+                            <!-- Settings -->
+                            <Dropdown align="right" width="48">
+                                <template #trigger>
+                                    <button class="p-2 text-gray-600 hover:bg-gray-100 rounded-full">
+                                        <SettingsIcon class="w-6 h-6" />
+                                    </button>
+                                </template>
+
+                                <template #content>
+                                    <div class="block px-4 py-2 text-xs text-gray-400">
+                                        Settings
+                                    </div>
+                                    <DropdownLink :href="route('profile.show')">
+                                        Profile Settings
+                                    </DropdownLink>
+                                    <DropdownLink :href="route('profile.show')">
+                                        Account Settings
+                                    </DropdownLink>
+                                </template>
+                            </Dropdown>
+
+                            <!-- Profile Photo -->
+                            <Dropdown align="right" width="48">
+                                <template #trigger>
+                                    <button class="flex text-sm border-2 border-transparent rounded-full focus:outline-none focus:border-gray-300 transition">
+                                        <img 
+                                            class="h-10 w-10 rounded-full object-cover" 
+                                            :src="$page.props.auth.user.profile_photo_url" 
+                                            :alt="$page.props.auth.user.name"
+                                        >
+                                    </button>
+                                </template>
+
+                                <template #content>
+                                    <div class="block px-4 py-2 text-xs text-gray-400">
+                                        Manage Account
+                                    </div>
+
+                                    <DropdownLink :href="route('profile.show')">
+                                        Profile
+                                    </DropdownLink>
+
+                                    <DropdownLink 
+                                        v-if="$page.props.jetstream.hasApiFeatures" 
+                                        :href="route('api-tokens.index')"
+                                    >
+                                        API Tokens
+                                    </DropdownLink>
+
+                                    <div class="border-t border-gray-200" />
+
+                                    <form @submit.prevent="logout">
+                                        <DropdownLink as="button">
+                                            Log Out
+                                        </DropdownLink>
+                                    </form>
+                                </template>
+                            </Dropdown>
+                        </div>
+                    </div>
                 </div>
             </header>
 
