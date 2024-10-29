@@ -38,7 +38,7 @@ const filters = ref([
                 </div>
                 <nav class="mt-8">
                     <a href="#" class="flex items-center px-4 py-2 text-blue-600 bg-blue-100">
-                        <i class="fas fa-home mr-3"></i>
+                        <HomeIcon class="mr-3" />
                         Home
                     </a>
                     <a href="#" class="flex items-center px-4 py-2 text-gray-700 hover:bg-gray-100">
@@ -69,10 +69,10 @@ const filters = ref([
                     <div class="flex items-center space-x-4">
                         <input type="text" placeholder="Search anything here" class="px-4 py-2 border rounded-md">
                         <button class="p-2 text-gray-600 hover:bg-gray-100 rounded-full">
-                            <i class="fas fa-bell"></i>
+                            <BellIcon />
                         </button>
                         <button class="p-2 text-gray-600 hover:bg-gray-100 rounded-full">
-                            <i class="fas fa-cog"></i>
+                            <SettingsIcon />
                         </button>
                         <img src="/path-to-profile-picture.jpg" alt="Profile" class="w-10 h-10 rounded-full">
                     </div>
@@ -88,7 +88,7 @@ const filters = ref([
                         <div class="bg-white p-4 rounded-lg shadow">
                             <div class="flex justify-between items-center mb-4">
                                 <div class="flex items-center">
-                                    <i class="fas fa-folder text-blue-500 mr-2"></i>
+                                    <FolderIcon class="mr-2" />
                                     <span class="font-medium">Documents</span>
                                 </div>
                                 <button class="text-gray-400 hover:text-gray-600">
