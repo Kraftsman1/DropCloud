@@ -66,16 +66,6 @@ const filters = ref([
                         <h1 class="text-2xl font-bold text-gray-800">My Cloud</h1>
                         <p class="text-gray-600">Welcome, Deen! 👋</p>
                     </div>
-                    <div class="flex items-center space-x-4">
-                        <input type="text" placeholder="Search anything here" class="px-4 py-2 border rounded-md">
-                        <button class="p-2 text-gray-600 hover:bg-gray-100 rounded-full">
-                            <BellIcon />
-                        </button>
-                        <button class="p-2 text-gray-600 hover:bg-gray-100 rounded-full">
-                            <SettingsIcon />
-                        </button>
-                        <img src="/path-to-profile-picture.jpg" alt="Profile" class="w-10 h-10 rounded-full">
-                    </div>
                 </header>
 
                 <section>
