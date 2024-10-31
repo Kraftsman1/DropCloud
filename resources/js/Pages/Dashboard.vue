@@ -33,9 +33,6 @@ const filters = ref([
         <div class="flex h-screen bg-gray-100">
             <!-- Sidebar -->
             <aside class="w-64 bg-white shadow-md">
-                <div class="p-4">
-                    <img src="/path-to-dropbox-logo.svg" alt="Dropbox" class="w-32">
-                </div>
                 <nav class="mt-8">
                     <a href="#" class="flex items-center px-4 py-2 text-blue-600 bg-blue-100">
                         <HomeIcon class="mr-3" />
