@@ -60,8 +60,7 @@ const filters = ref([
             <main class="flex-1 p-8 overflow-auto">
                 <header class="flex justify-between items-center mb-8">
                     <div>
-                        <h1 class="text-2xl font-bold text-gray-800">My Cloud</h1>
-                        <p class="text-gray-600">Welcome, Deen! 👋</p>
+                        <h1 class="text-2xl font-bold text-gray-800">Welcome, {{ $page.props.auth.user.name }}! 👋</h1>
                     </div>
                 </header>
 
