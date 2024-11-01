@@ -26,6 +26,10 @@ return new class extends Migration
             $table->string('label');
             $table->string('name');
             $table->longText('configuration');
+            $table->unsignedBigInteger('user_id')->nullable();
+            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
+            $table->unsignedBigInteger('team_id')->nullable();
+            $table->foreign('team_id')->references('id')->on('teams')->onDelete('cascade');
             $table->timestamps();
             $table->softDeletes();
         });
