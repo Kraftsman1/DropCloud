@@ -20,6 +20,8 @@ class StorageProvider extends Model
         'label',
         'name',
         'configuration',
+        'user_id',
+        'team_id',
     ];
 
     protected $casts = [
@@ -46,6 +48,26 @@ class StorageProvider extends Model
     public function getConfigurationAttribute($value)
     {
         return unserialize(Crypt::decryptString($value));
+    }
+
+    /**
+     * Get the user that owns the storage provider.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
+
+    /**
+     * Get the team that owns the storage provider.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
+    public function team()
+    {
+        return $this->belongsTo(Team::class);
     }
 
     /**
