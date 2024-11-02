@@ -3,9 +3,10 @@
 namespace App\Services;
 
 use App\Models\StorageProvider;
-use Illuminate\Validation\ValidationException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Validation\ValidationException;
 
 class StorageProviderService
 {
@@ -17,10 +18,33 @@ class StorageProviderService
      */
     public function createProvider(array $data)
     {
+        $user = auth()->user();
+    
+        if (!$user) {
+            return [
+                'success' => false,
+                'error' => 'User is not authenticated.',
+            ];
+        }
+    
+        // Get the user's current team ID
+        $teamID = $user->current_team_id;
+    
+        if (!$teamID) {
+            return [
+                'success' => false,
+                'error' => 'User does not have a current team assigned.',
+            ];
+        }
+    
         try {
             $storageProvider = new StorageProvider($data);
             
-            // Check if save operation succeeded
+            // Save the user and team IDs
+            $storageProvider->user_id = $user->id;
+            $storageProvider->team_id = $teamID;
+    
+            // Attempt to save and check for success
             if ($storageProvider->save()) {
                 return [
                     'success' => true,
@@ -30,18 +54,18 @@ class StorageProviderService
             } else {
                 return [
                     'success' => false,
-                    'error' => 'Failed to save storage provider.'
+                    'error' => 'Failed to save storage provider.',
                 ];
             }
         } catch (ValidationException $e) {
             return [
                 'success' => false,
-                'error' => 'Validation failed: ' . $e->getMessage()
+                'error' => 'Validation failed: ' . $e->getMessage(),
             ];
         } catch (\RuntimeException $e) {
             return [
                 'success' => false,
-                'error' => 'Connection test failed: ' . $e->getMessage()
+                'error' => 'Connection test failed: ' . $e->getMessage(),
             ];
         }
     }
