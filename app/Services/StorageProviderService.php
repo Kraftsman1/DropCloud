@@ -39,7 +39,7 @@ class StorageProviderService
     
         try {
             $storageProvider = new StorageProvider($data);
-            
+    
             // Save the user and team IDs
             $storageProvider->user_id = $user->id;
             $storageProvider->team_id = $teamID;
@@ -69,20 +69,20 @@ class StorageProviderService
             ];
         }
     }
-
+    
 
     /**
      * Tests the connection to a storage provider.
      *
      * @param \Illuminate\Http\Request $request The request containing provider details.
-     * 
+     *
      * @return array An array containing the success status, message, and provider instance if successful,
      *               or an error message if the connection test fails.
-     * 
+     *
      * @throws \Illuminate\Validation\ValidationException If validation fails.
      * @throws \RuntimeException If the connection test fails due to a runtime exception.
      */
-    public function testConnection(array $data) 
+    public function testConnection(array $data)
     {
         try {
             // Create a temporary storage provider instance
@@ -124,7 +124,22 @@ class StorageProviderService
      */
     public function getAllProviders()
     {
-        return StorageProvider::all()->toArray();
+        // Get the authenticated user
+        $user = auth()->user();
+
+        if (!$user) {
+            return [
+                'success' => false,
+                'error' => 'User is not authenticated.',
+            ];
+        }
+
+        // Get the user's current team ID
+        $currentTeamId = $user->current_team_id;
+
+        // Retrieve providers associated with both the user and their current team
+        return StorageProvider::where('team_id', $currentTeamId)->get();
+
     }
 
     /**
@@ -139,12 +154,12 @@ class StorageProviderService
             $provider = StorageProvider::findOrFail($id);
             return [
                 'success' => true,
-                'provider' => $provider->toArray()
+                'provider' => $provider->toArray(),
             ];
         } catch (ModelNotFoundException $e) {
             return [
                 'success' => false,
-                'error' => 'Storage provider not found.'
+                'error' => 'Storage provider not found.',
             ];
         }
     }
@@ -171,23 +186,23 @@ class StorageProviderService
             } else {
                 return [
                     'success' => false,
-                    'error' => 'Failed to update storage provider.'
+                    'error' => 'Failed to update storage provider.',
                 ];
             }
         } catch (ModelNotFoundException $e) {
             return [
                 'success' => false,
-                'error' => 'Storage provider not found.'
+                'error' => 'Storage provider not found.',
             ];
         } catch (ValidationException $e) {
             return [
                 'success' => false,
-                'error' => 'Validation failed: ' . $e->getMessage()
+                'error' => 'Validation failed: ' . $e->getMessage(),
             ];
         } catch (\RuntimeException $e) {
             return [
                 'success' => false,
-                'error' => 'Connection test failed: ' . $e->getMessage()
+                'error' => 'Connection test failed: ' . $e->getMessage(),
             ];
         }
     }
@@ -205,12 +220,12 @@ class StorageProviderService
             $provider->delete();
             return [
                 'success' => true,
-                'message' => 'Storage provider deleted successfully.'
+                'message' => 'Storage provider deleted successfully.',
             ];
         } catch (ModelNotFoundException $e) {
             return [
                 'success' => false,
-                'error' => 'Storage provider not found.'
+                'error' => 'Storage provider not found.',
             ];
         }
     }
@@ -250,5 +265,3 @@ class StorageProviderService
     //     }
     // }
 }
-
-?>
