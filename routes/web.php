@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
 use App\Http\Controllers\StorageProviderController;
+use App\Http\Controllers\FileManagerController;
 
 /*
 |--------------------------------------------------------------------------
@@ -44,5 +45,6 @@ Route::middleware([
     Route::put('/storage-providers/{id}', [StorageProviderController::class, 'update'])->name('storage-providers.update');
     Route::delete('/storage-providers/{id}', [StorageProviderController::class, 'destroy'])->name('storage-providers.destroy');
 
+    Route::get('/file-manager', [FileManagerController::class, 'index'])->name('file-manager.index');
 
 });
