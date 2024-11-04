@@ -29,28 +29,38 @@ class FileManagerController extends Controller
         $this->fileManagerService = $fileManagerService;
     }
 
-    /**
-     * Display a listing of the files from the storage provider.
-     *
-     * @param \Illuminate\Http\Request $request The HTTP request instance.
-     * @param \App\Models\StorageProvider|null $provider The storage provider instance (optional).
-     * @return \Illuminate\Http\JsonResponse The JSON response containing the list of files or an error message.
-     *
-     * This method retrieves all available storage providers for the authenticated user.
-     * If no specific provider is specified, it uses the first available provider.
-     * It then sets the provider in the file manager service and attempts to list the contents
-     * of the specified path. If the provider is not found, it returns a 404 response.
-     * If an error occurs while listing the contents, it returns a 500 response with the error message.
-     */
     public function index(Request $request, StorageProvider $provider = null)
     {
-        // Get all available storage providers
-        $providers = auth()->user()->storageProviders;
+        // get the provider id from the url
+        $provider = $request->route('id');
+
+        // Get the authenticated user
+        $user = auth()->user();
     
-        // Use the first provider if none is specified
+        if (!$user) {
+            return response()->json([
+                'success' => false,
+                'error' => 'User is not authenticated.',
+            ], 401);
+        }
+    
+        // Get the user's current team ID
+        $teamID = $user->current_team_id;
+    
+        if (!$teamID) {
+            return response()->json([
+                'success' => false,
+                'error' => 'User does not have a current team assigned.',
+            ], 403);
+        }
+    
+        // Get all available storage providers for the current team
+        $providers = StorageProvider::where('team_id', $teamID)->get();
+    
+        // Use the specified provider or the first one if none is provided
         $activeProvider = $provider ?? $providers->first();
     
-        // Check if active provider exists, if not return 404 response
+        // Check if the active provider exists, if not return 404 response
         if (!$activeProvider) {
             return response()->json([
                 'success' => false,
@@ -77,7 +87,6 @@ class FileManagerController extends Controller
             ], 500);
         }
     }
-    
 
     /**
      * Download a file from the storage provider.
