@@ -50,8 +50,26 @@ class FileManagerService
     public function listContents(string $path = '', bool $recursive = false)
     {
         try {
+
+            if (!$this->filesystem) {
+                $this->filesystem = $this->getFileSystem();
+            }
+
             $contents = $this->filesystem->listContents($path, $recursive);
-            return $contents;
+
+            $allContents = [];
+
+            foreach ($contents as $content) {
+                $allContents[] = [
+                    'path' => $content['path'],
+                    'type' => $content['type'],
+                    'size' => $content['size'] ?? null,
+                    'timestamp' => $content['timestamp'] ?? null,
+                    'visibility' => $content['visibility'] ?? null,
+                ];
+            }
+
+            return $allContents;
         } catch (\Exception $e) {
             throw new \RuntimeException('Failed to list contents: ' . $e->getMessage());
         }
