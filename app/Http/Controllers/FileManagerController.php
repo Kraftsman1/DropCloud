@@ -31,35 +31,35 @@ class FileManagerController extends Controller
 
     public function index(Request $request, StorageProvider $provider = null)
     {
-        // get the provider id from the url
-        $provider = $request->route('id');
+        // Get the provider id from the route if not provided in parameter
+        $providerId = $provider ? $provider->id : $request->route('provider');
 
         // Get the authenticated user
         $user = auth()->user();
-    
+        
         if (!$user) {
             return response()->json([
                 'success' => false,
                 'error' => 'User is not authenticated.',
             ], 401);
         }
-    
+        
         // Get the user's current team ID
         $teamID = $user->current_team_id;
-    
+        
         if (!$teamID) {
             return response()->json([
                 'success' => false,
                 'error' => 'User does not have a current team assigned.',
             ], 403);
         }
-    
+        
         // Get all available storage providers for the current team
         $providers = StorageProvider::where('team_id', $teamID)->get();
     
         // Use the specified provider or the first one if none is provided
-        $activeProvider = $provider ?? $providers->first();
-    
+        $activeProvider = $provider ?? $providers->firstWhere('id', $providerId);
+
         // Check if the active provider exists, if not return 404 response
         if (!$activeProvider) {
             return response()->json([
@@ -67,13 +67,14 @@ class FileManagerController extends Controller
                 'error' => 'Storage provider not found.',
             ], 404);
         }
-    
+        
         // Set provider and list files
         $this->fileManagerService->setProvider($activeProvider);
         $path = $request->input('path', '');
-    
+        
         try {
-            $contents = $this->fileManagerService->listContents($path);
+            // Assuming `listContents` requires a `$recursive` argument (use true or false based on requirements)
+            $contents = $this->fileManagerService->listContents($path, false);
             return response()->json([
                 'success' => true,
                 'contents' => $contents,
@@ -87,6 +88,7 @@ class FileManagerController extends Controller
             ], 500);
         }
     }
+    
 
     /**
      * Download a file from the storage provider.
