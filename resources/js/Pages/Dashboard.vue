@@ -1,31 +1,50 @@
 <script setup>
-import { ref } from 'vue';
-import { Link } from '@inertiajs/vue3';
-import AppLayout from '@/Layouts/AppLayout.vue';
+import { defineProps } from "vue";
+import { Link } from "@inertiajs/vue3";
+import AppLayout from "@/Layouts/AppLayout.vue";
 import {
-    HomeIcon, FilterIcon, InfoIcon, BellIcon, SettingsIcon,
-    HeadphonesIcon, FilmIcon, FolderIcon, ImageIcon, FileAudioIcon,
-    FileTextIcon
-} from 'lucide-vue-next';
+    HomeIcon,
+    FolderIcon,
+    FileAudioIcon,
+    FileTextIcon,
+    FileImageIcon,
+    FileVideoIcon,
+} from "lucide-vue-next";
 
 const props = defineProps({
     folders: Array,
-    files: Array
+    files: Array,
 });
 
-const fileTypes = ref([
-    { name: 'Document', checked: false },
-    { name: 'Photo', checked: true },
-    { name: 'Music', checked: false },
-    { name: 'Movie', checked: true },
-    { name: 'Spreadsheet', checked: false },
-    { name: 'Keynote', checked: false }
-]);
+const getFileTypeIcon = (type) => {
+    switch (type) {
+        case "document":
+            return FileTextIcon;
+        case "image":
+            return FileImageIcon;
+        case "audio":
+            return FileAudioIcon;
+        case "video":
+            return FileVideoIcon;
+        default:
+            return FolderIcon;
+    }
+};
 
-const filters = ref([
-    { name: 'Me', checked: true },
-    { name: 'Team', checked: false }
-]);
+const formatFileSize = (size) => {
+    const units = ["B", "KB", "MB", "GB", "TB"];
+    let i = 0;
+    while (size >= 1024 && i < units.length - 1) {
+        size /= 1024;
+        i++;
+    }
+    return `${size.toFixed(2)} ${units[i]}`;
+};
+
+const formatDate = (dateString) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString();
+};
 </script>
 
 <template>
@@ -34,25 +53,38 @@ const filters = ref([
             <!-- Sidebar -->
             <aside class="w-64 bg-white shadow-md">
                 <nav class="mt-8">
-                    <a href="#" class="flex items-center px-4 py-2 text-blue-600 bg-blue-100">
+                    <Link
+                        href="#"
+                        class="flex items-center px-4 py-2 text-blue-600 bg-blue-100"
+                    >
                         <HomeIcon class="mr-3" />
                         Home
-                    </a>
-                    <a href="#" class="flex items-center px-4 py-2 text-gray-700 hover:bg-gray-100">
-                        <i class="fas fa-file mr-3"></i>
+                    </Link>
+                    <Link
+                        href="#"
+                        class="flex items-center px-4 py-2 text-gray-700 hover:bg-gray-100"
+                    >
+                        <FolderIcon class="mr-3" />
                         My Files
-                    </a>
+                    </Link>
                     <!-- Add other menu items similarly -->
                 </nav>
                 <div class="absolute bottom-0 left-0 w-64 p-4">
                     <div class="mb-2">
                         <div class="text-sm text-gray-600">75% In-use</div>
                         <div class="w-full bg-gray-200 rounded-full h-2.5">
-                            <div class="bg-blue-600 h-2.5 rounded-full" style="width: 75%"></div>
+                            <div
+                                class="bg-blue-600 h-2.5 rounded-full"
+                                style="width: 75%"
+                            ></div>
                         </div>
                     </div>
                     <div class="text-xs text-gray-500">600GB of 800GB</div>
-                    <button class="mt-2 w-full bg-blue-600 text-white py-2 rounded-md">Upgrade</button>
+                    <button
+                        class="mt-2 w-full bg-blue-600 text-white py-2 rounded-md"
+                    >
+                        Upgrade
+                    </button>
                 </div>
             </aside>
 
@@ -60,39 +92,185 @@ const filters = ref([
             <main class="flex-1 p-8 overflow-auto">
                 <header class="flex justify-between items-center mb-8">
                     <div>
-                        <h1 class="text-2xl font-bold text-gray-800">Welcome, {{ $page.props.auth.user.name }}! 👋</h1>
+                        <h1 class="text-2xl font-bold text-gray-800">
+                            Welcome, {{ $page.props.auth.user.name }}! 👋
+                        </h1>
                     </div>
                 </header>
 
                 <section>
-                    <div class="flex justify-between items-center mb-4">
-                        <h2 class="text-xl font-semibold">All files</h2>
-                        <button class="px-4 py-2 bg-blue-100 text-blue-600 rounded-md">+ Add new</button>
+                    <div
+                        class="mt-4 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4"
+                    >
+                        <div class="bg-white overflow-hidden shadow rounded-lg">
+                            <div class="px-4 py-5 sm:p-6">
+                                <dt
+                                    class="text-sm font-medium text-gray-500 truncate"
+                                >
+                                    Total Storage
+                                </dt>
+                                <dd
+                                    class="mt-1 text-3xl font-semibold text-gray-900"
+                                >
+                                    250.5 GB
+                                </dd>
+                                <div class="mt-1 text-sm text-gray-500">
+                                    +20% from last month
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="bg-white overflow-hidden shadow rounded-lg">
+                            <div class="px-4 py-5 sm:p-6">
+                                <dt
+                                    class="text-sm font-medium text-gray-500 truncate"
+                                >
+                                    Active Teams
+                                </dt>
+                                <dd
+                                    class="mt-1 text-3xl font-semibold text-gray-900"
+                                >
+                                    7
+                                </dd>
+                                <div class="mt-1 text-sm text-gray-500">
+                                    +2 new this week
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="bg-white overflow-hidden shadow rounded-lg">
+                            <div class="px-4 py-5 sm:p-6">
+                                <dt
+                                    class="text-sm font-medium text-gray-500 truncate"
+                                >
+                                    Storage Providers
+                                </dt>
+                                <dd
+                                    class="mt-1 text-3xl font-semibold text-gray-900"
+                                >
+                                    3
+                                </dd>
+                                <div class="mt-1 text-sm text-gray-500">
+                                    AWS S3, GCS, Azure
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="bg-white overflow-hidden shadow rounded-lg">
+                            <div class="px-4 py-5 sm:p-6">
+                                <dt
+                                    class="text-sm font-medium text-gray-500 truncate"
+                                >
+                                    Usage Overview
+                                </dt>
+                                <dd
+                                    class="mt-1 text-3xl font-semibold text-gray-900"
+                                >
+                                    75%
+                                </dd>
+                                <div class="mt-1 text-sm text-gray-500">
+                                    Of total storage used
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
+                        <!-- Recent Activity -->
+                        <div class="bg-white p-6 rounded-lg shadow-md">
+                            <h2 class="text-lg font-semibold mb-4">
+                                Recent Activity
+                            </h2>
+                            <p class="text-sm text-gray-600">
+                                John uploaded file.pdf to Project X
+                            </p>
+                            <p class="text-sm text-gray-600">
+                                Sarah shared folder "Designs" with Marketing
+                                team
+                            </p>
+                            <p class="text-sm text-gray-600">
+                                New team "Product Launch" created
+                            </p>
+                        </div>
+
+                        <!-- Quick Actions -->
+                        <div class="bg-white p-6 rounded-lg shadow-md">
+                            <h2 class="text-lg font-semibold mb-4">
+                                Quick Actions
+                            </h2>
+                            <button
+                                class="w-full bg-black text-white py-2 rounded-lg mb-2"
+                            >
+                                + Add Storage Provider
+                            </button>
+                            <button
+                                class="w-full bg-gray-200 text-gray-700 py-2 rounded-lg mb-2"
+                            >
+                                Manage Teams
+                            </button>
+                            <button
+                                class="w-full bg-gray-200 text-gray-700 py-2 rounded-lg"
+                            >
+                                Configure Storage
+                            </button>
+                        </div>
+                    </div>
+                </section>
+
+                <section>
+                    <div class="flex justify-between items-center mt-8 mb-4">
+                        <h2 class="text-xl font-semibold">All files</h2>
+                        <button
+                            class="px-4 py-2 bg-blue-100 text-blue-600 rounded-md"
+                        >
+                            + Add new
+                        </button>
+                    </div>
+                    <div
+                        class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+                    >
                         <!-- Repeat this card for each folder -->
-                        <div class="bg-white p-4 rounded-lg shadow">
+                        <div
+                            v-for="folder in props.folders"
+                            :key="folder.id"
+                            class="bg-white p-4 rounded-lg shadow"
+                        >
                             <div class="flex justify-between items-center mb-4">
                                 <div class="flex items-center">
                                     <FolderIcon class="mr-2" />
-                                    <span class="font-medium">Documents</span>
+                                    <span class="font-medium">{{
+                                        folder.name
+                                    }}</span>
                                 </div>
-                                <button class="text-gray-400 hover:text-gray-600">
+                                <button
+                                    class="text-gray-400 hover:text-gray-600"
+                                >
                                     <i class="fas fa-ellipsis-v"></i>
                                 </button>
                             </div>
-                            <div class="flex justify-between text-sm text-gray-600">
+                            <div
+                                class="flex justify-between text-sm text-gray-600"
+                            >
                                 <div>
                                     <span>Shared Users</span>
-                                    <div class="flex -space-x-2 overflow-hidden mt-1">
+                                    <div
+                                        class="flex -space-x-2 overflow-hidden mt-1"
+                                    >
                                         <!-- Repeat for each user avatar -->
-                                        <img class="inline-block h-6 w-6 rounded-full ring-2 ring-white"
-                                            src="/path-to-avatar.jpg" alt="">
+                                        <img
+                                            v-for="user in folder.sharedUsers"
+                                            :key="user.id"
+                                            class="inline-block h-6 w-6 rounded-full ring-2 ring-white"
+                                            :src="user.avatarUrl"
+                                            :alt="user.name"
+                                        />
                                     </div>
                                 </div>
                                 <div>
                                     <span>Inside Files</span>
-                                    <p class="text-blue-500 font-medium mt-1">3,985</p>
+                                    <p class="text-blue-500 font-medium mt-1">
+                                        {{ folder.fileCount }}
+                                    </p>
                                 </div>
                             </div>
                         </div>
@@ -113,22 +291,38 @@ const filters = ref([
                         </thead>
                         <tbody>
                             <!-- Repeat this row for each recent file -->
-                            <tr class="border-b">
+                            <tr
+                                v-for="file in props.files"
+                                :key="file.id"
+                                class="border-b"
+                            >
                                 <td class="py-3 flex items-center">
-                                    <i class="fas fa-file-image text-orange-500 mr-2"></i>
-                                    Website Design.png
+                                    <component
+                                        :is="getFileTypeIcon(file.type)"
+                                        class="mr-2"
+                                    />
+                                    {{ file.name }}
                                 </td>
                                 <td>
-                                    <div class="flex -space-x-2 overflow-hidden">
+                                    <div
+                                        class="flex -space-x-2 overflow-hidden"
+                                    >
                                         <!-- Repeat for each user avatar -->
-                                        <img class="inline-block h-6 w-6 rounded-full ring-2 ring-white"
-                                            src="/path-to-avatar.jpg" alt="">
+                                        <img
+                                            v-for="user in file.sharedUsers"
+                                            :key="user.id"
+                                            class="inline-block h-6 w-6 rounded-full ring-2 ring-white"
+                                            :src="user.avatarUrl"
+                                            :alt="user.name"
+                                        />
                                     </div>
                                 </td>
-                                <td>2.8 MB</td>
-                                <td>Dec 13, 2022</td>
+                                <td>{{ formatFileSize(file.size) }}</td>
+                                <td>{{ formatDate(file.lastModified) }}</td>
                                 <td>
-                                    <button class="text-gray-400 hover:text-gray-600">
+                                    <button
+                                        class="text-gray-400 hover:text-gray-600"
+                                    >
                                         <i class="fas fa-ellipsis-v"></i>
                                     </button>
                                 </td>
@@ -136,9 +330,7 @@ const filters = ref([
                         </tbody>
                     </table>
                 </section>
-
             </main>
-
         </div>
     </AppLayout>
 </template>
