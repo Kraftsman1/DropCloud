@@ -1,5 +1,5 @@
 <template>
-    <app-layout>
+    <AppLayout>
         <template #header>
             <h2 class="font-semibold text-xl text-gray-800 leading-tight">
                 Storage Providers
@@ -18,7 +18,7 @@
                 </div>
             </div>
         </div>
-    </app-layout>
+    </AppLayout>
 </template>
 
 <script>

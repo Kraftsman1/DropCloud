@@ -45,6 +45,6 @@ Route::middleware([
     Route::put('/storage-providers/{id}', [StorageProviderController::class, 'update'])->name('storage-providers.update');
     Route::delete('/storage-providers/{id}', [StorageProviderController::class, 'destroy'])->name('storage-providers.destroy');
 
-    Route::get('/file-manager/{id}', [FileManagerController::class, 'index'])->name('file-manager.index');
+    Route::get('/file-manager/{provider}', [FileManagerController::class, 'index'])->name('file-manager.index');
 
 });
