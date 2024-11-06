@@ -198,11 +198,21 @@ const formatDate = (dateString) => {
                             <h2 class="text-lg font-semibold mb-4">
                                 Quick Actions
                             </h2>
-                            <button
-                                class="w-full bg-black text-white py-2 rounded-lg mb-2"
-                            >
-                                + Add Storage Provider
-                            </button>
+                            <Link :href="route('storage-providers.create')">
+                                <button
+                                    class="w-full bg-black text-white py-2 rounded-lg mb-2"
+                                >
+                                    + Add Storage Provider
+                                </button>
+                            </Link>
+                            <Link :href="route('storage-providers.index')">
+                                <button
+                                    class="w-full bg-blue-600 text-white py-2 rounded-lg mb-2"
+                                >
+                                    + View Storage Providers
+                                </button>
+                            </Link>
+
                             <button
                                 class="w-full bg-gray-200 text-gray-700 py-2 rounded-lg mb-2"
                             >
