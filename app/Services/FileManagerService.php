@@ -60,13 +60,7 @@ class FileManagerService
             $allContents = [];
 
             foreach ($contents as $content) {
-                $allContents[] = [
-                    'path' => $content['path'],
-                    'type' => $content['type'],
-                    'size' => $content['size'] ?? null,
-                    'timestamp' => $content['timestamp'] ?? null,
-                    'visibility' => $content['visibility'] ?? null,
-                ];
+                $allContents[] = $content;  
             }
 
             return $allContents;
