@@ -9,6 +9,8 @@ use App\Services\FileManagerService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 
+use Inertia\Inertia;
+
 class FileManagerController extends Controller
 {
 
@@ -75,14 +77,15 @@ class FileManagerController extends Controller
         try {
             // Assuming `listContents` requires a `$recursive` argument (use true or false based on requirements)
             $contents = $this->fileManagerService->listContents($path, false);
-            return response()->json([
-                'success' => true,
+            return Inertia::render('FileManager/Index', [
                 'contents' => $contents,
+                'provider' => $activeProvider,
+                'providers' => $providers,
             ]);
         } catch (\RuntimeException $e) {
             // Log the error message for debugging
             Log::error('Failed to list the contents: ' . $e->getMessage(), ['exception' => $e]);
-            return response()->json([
+            return Inertia::render('StorageProvider/Index', [
                 'success' => false,
                 'error' => $e->getMessage(),
             ], 500);
