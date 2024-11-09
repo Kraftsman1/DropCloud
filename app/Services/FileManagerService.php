@@ -1,10 +1,13 @@
-<?php 
+<?php
 
 namespace App\Services;
 
 use App\Models\StorageProvider;
 use Illuminate\Support\Facades\Storage;
 use League\Flysystem\Filesystem;
+
+use Illuminate\Support\Collection;
+use League\Flysystem\StorageAttributes;
 
 class FileManagerService
 {
@@ -50,22 +53,44 @@ class FileManagerService
     public function listContents(string $path = '', bool $recursive = false)
     {
         try {
-
             if (!$this->filesystem) {
                 $this->filesystem = $this->getFileSystem();
             }
 
             $contents = $this->filesystem->listContents($path, $recursive);
 
-            $allContents = [];
+            $files = [];
+            $folders = [];
 
             foreach ($contents as $content) {
-                $allContents[] = $content;  
+                $metadata = [
+                    'path' => $content->path(),
+                    'type' => $content->type(),
+                ];
+
+                if ($content instanceof \League\Flysystem\FileAttributes) {
+                    $metadata['size'] = $this->filesystem->fileSize($content->path());
+                    $metadata['mime_type'] = $this->filesystem->mimeType($content->path());
+                    $metadata['last_modified'] = $this->filesystem->lastModified($content->path());
+                    $metadata['visibility'] = $this->filesystem->visibility($content->path());
+                    $files[] = $metadata;
+                } else {
+                    $folders[] = $metadata;
+                }
             }
 
-            return $allContents;
+            return [
+                'success' => true,
+                'data' => [
+                    'files' => $files,
+                    'folders' => $folders,
+                ],
+            ];
         } catch (\Exception $e) {
-            throw new \RuntimeException('Failed to list contents: ' . $e->getMessage());
+            return [
+                'success' => false,
+                'error' => 'Failed to list contents: ' . $e->getMessage()
+            ];
         }
     }
 
@@ -98,7 +123,7 @@ class FileManagerService
             // Upload file with metadata
             $this->filesystem->writeStream($fullPath, $stream, [
                 'metadata' => $metadata,
-                'visibility' => $options['visibility'] ?? 'private'
+                'visibility' => $options['visibility'] ?? 'private',
             ]);
 
             if (is_resource($stream)) {
@@ -108,7 +133,7 @@ class FileManagerService
             return [
                 'success' => true,
                 'path' => $fullPath,
-                'metadata' => $metadata
+                'metadata' => $metadata,
             ];
         } catch (\Exception $e) {
             throw new \RuntimeException("Failed to upload file: {$e->getMessage()}");
@@ -119,15 +144,15 @@ class FileManagerService
      * Download a file from the filesystem.
      *
      * @param string $path The path to the file to be downloaded.
-     * 
+     *
      * @return array An associative array containing:
      *               - 'stream': The file stream.
      *               - 'mime_type': The MIME type of the file.
      *               - 'size': The size of the file in bytes.
-     * 
+     *
      * @throws \RuntimeException If the file does not exist or if there is an error during the download process.
      */
-    public function downloadFile(string $path) 
+    public function downloadFile(string $path)
     {
         try {
             if (!$this->filesystem->fileExists($path)) {
@@ -179,13 +204,13 @@ class FileManagerService
      * including MIME type, file size, last modified timestamp, and visibility status.
      *
      * @param string $path The path to the file for which metadata is being retrieved.
-     * 
+     *
      * @return array An associative array containing the following keys:
      *               - 'mime_type': The MIME type of the file.
      *               - 'size': The size of the file in bytes.
      *               - 'last_modified': The last modified timestamp of the file.
      *               - 'visibility': The visibility status of the file.
-     * 
+     *
      * @throws \RuntimeException If an error occurs while retrieving the metadata.
      */
     public function getMetadata(string $path)
@@ -203,5 +228,4 @@ class FileManagerService
     }
 
 }
-
 ?>
