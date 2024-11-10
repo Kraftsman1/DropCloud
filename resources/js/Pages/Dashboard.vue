@@ -48,7 +48,7 @@ const formatDate = (dateString) => {
 </script>
 
 <template>
-    <AppLayout title="File Manager">
+    <AppLayout title="Dashboard">
 
             <!-- Main content -->
             <main class="flex-1 p-8 overflow-auto">
