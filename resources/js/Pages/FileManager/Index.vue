@@ -1,19 +1,14 @@
 <script setup>
 import { ref, watch } from "vue";
+import axios from "axios";
 
 import AppLayout from "@/Layouts/AppLayout.vue";
 import FileContentList from "@/Components/FileManager/FileContentList.vue";
-
-//
 
 const props = defineProps({
     provider: {
         type: Object,
         required: true,
-    },
-    providers: {
-        type: Array,
-        default: () => [],
     },
     contents: {
         type: Array,
@@ -25,11 +20,9 @@ const props = defineProps({
     },
 });
 
-// log contents\
-console.log(props.contents);
 
 const currentPath = ref("/");
-const currentContents = ref(props.contents);
+const currentContents = ref(props.contents.data);
 const isCreatingFolder = ref(false);
 const isUploading = ref(false);
 const selectedItems = ref([])
@@ -77,7 +70,7 @@ const selectedItems = ref([])
             </div>
 
             <!-- Breadcrumb Navigation -->
-            <BreadcrumbNavigation :path="currentPath" @navigate="navigateTo" />
+            <!-- <BreadcrumbNavigation :path="currentPath" @navigate="navigateTo" /> -->
 
             <!-- File List -->
 
