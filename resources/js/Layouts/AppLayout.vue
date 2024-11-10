@@ -7,7 +7,7 @@ import Dropdown from "@/Components/Dropdown.vue";
 import DropdownLink from "@/Components/DropdownLink.vue";
 import NavLink from "@/Components/NavLink.vue";
 import ResponsiveNavLink from "@/Components/ResponsiveNavLink.vue";
-import { BellIcon } from "lucide-vue-next";
+import { HomeIcon, FolderIcon, BellIcon } from "lucide-vue-next";
 
 defineProps({
     title: String,
@@ -535,44 +535,43 @@ const logout = () => {
 
             <!-- Page Content -->
             <main class="flex h-screen bg-gray-100">
-                
-            <!-- Sidebar -->
-            <aside class="w-64 bg-white shadow-md">
-                <nav class="mt-8">
-                    <Link
-                        href="#"
-                        class="flex items-center px-4 py-2 text-blue-600 bg-blue-100"
-                    >
-                        <HomeIcon class="mr-3" />
-                        Home
-                    </Link>
-                    <Link
-                        href="#"
-                        class="flex items-center px-4 py-2 text-gray-700 hover:bg-gray-100"
-                    >
-                        <FolderIcon class="mr-3" />
-                        My Files
-                    </Link>
-                    <!-- Add other menu items similarly -->
-                </nav>
-                <div class="absolute bottom-0 left-0 w-64 p-4">
-                    <div class="mb-2">
-                        <div class="text-sm text-gray-600">75% In-use</div>
-                        <div class="w-full bg-gray-200 rounded-full h-2.5">
-                            <div
-                                class="bg-blue-600 h-2.5 rounded-full"
-                                style="width: 75%"
-                            ></div>
+                <!-- Sidebar -->
+                <aside class="w-64 bg-white shadow-md">
+                    <nav class="mt-8">
+                        <Link
+                            href="#"
+                            class="flex items-center px-4 py-2 text-blue-600 bg-blue-100"
+                        >
+                            <HomeIcon class="mr-3" />
+                            Home
+                        </Link>
+                        <Link
+                            href="#"
+                            class="flex items-center px-4 py-2 text-gray-700 hover:bg-gray-100"
+                        >
+                            <FolderIcon class="mr-3" />
+                            My Files
+                        </Link>
+                        <!-- Add other menu items similarly -->
+                    </nav>
+                    <div class="absolute bottom-0 left-0 w-64 p-4">
+                        <div class="mb-2">
+                            <div class="text-sm text-gray-600">75% In-use</div>
+                            <div class="w-full bg-gray-200 rounded-full h-2.5">
+                                <div
+                                    class="bg-blue-600 h-2.5 rounded-full"
+                                    style="width: 75%"
+                                ></div>
+                            </div>
                         </div>
+                        <div class="text-xs text-gray-500">600GB of 800GB</div>
+                        <button
+                            class="mt-2 w-full bg-blue-600 text-white py-2 rounded-md"
+                        >
+                            Upgrade
+                        </button>
                     </div>
-                    <div class="text-xs text-gray-500">600GB of 800GB</div>
-                    <button
-                        class="mt-2 w-full bg-blue-600 text-white py-2 rounded-md"
-                    >
-                        Upgrade
-                    </button>
-                </div>
-            </aside>
+                </aside>
                 <slot />
             </main>
         </div>
