@@ -9,6 +9,8 @@ const props = defineProps({
     },
 });
 
+const data = props.contents.data;
+
 const emit = defineEmits(["navigate", "download", "delete"]);
 
 /**
@@ -32,14 +34,6 @@ const formatFileSize = (bytes) => {
  */
 const formatDate = (timestamp) => new Date(timestamp * 1000).toLocaleString();
 
-// Computed properties for directories and files
-const sortedDirectories = computed(() =>
-    props.contents.filter(item => item.isDirectory)
-);
-const sortedFiles = computed(() =>
-    props.contents.filter(item => !item.isDirectory)
-);
-
 // Handlers
 const handleNavigate = (path) => emit("navigate", path);
 const handleDownload = (path) => emit("download", path);
@@ -59,20 +53,20 @@ const handleDelete = (path, type) => emit("delete", path, type);
 
         <!-- Directories -->
         <div
-            v-for="dir in sortedDirectories"
-            :key="dir.path"
+            v-for="folder in data.folders"
+            :key="folder.path"
             class="grid grid-cols-12 gap-4 p-4 hover:bg-gray-50 border-b cursor-pointer"
-            @click="handleNavigate(dir.path)"
+            @click="handleNavigate(folder.path)"
         >
             <div class="col-span-6 flex items-center space-x-2">
                 <FolderIcon class="w-5 h-5 text-yellow-500" />
-                <span>{{ extractFileName(dir.path) }}</span>
+                <span>{{ extractFileName(folder.path) }}</span>
             </div>
             <div class="col-span-2">--</div>
             <div class="col-span-3">--</div>
             <div class="col-span-1">
                 <button
-                    @click.stop="handleDelete(dir.path, 'directory')"
+                    @click.stop="handleDelete(folder.path, 'folder')"
                     class="text-red-500 hover:text-red-700"
                 >
                     <TrashIcon class="w-5 h-5" />
@@ -82,7 +76,7 @@ const handleDelete = (path, type) => emit("delete", path, type);
 
         <!-- Files -->
         <div
-            v-for="file in sortedFiles"
+            v-for="file in data.files"
             :key="file.path"
             class="grid grid-cols-12 gap-4 p-4 hover:bg-gray-50 border-b"
         >
@@ -90,7 +84,7 @@ const handleDelete = (path, type) => emit("delete", path, type);
                 <FileIcon class="w-5 h-5 text-blue-500" />
                 <span>{{ extractFileName(file.path) }}</span>
             </div>
-            <div class="col-span-2">{{ formatFileSize(file.file_size) }}</div>
+            <div class="col-span-2">{{ formatFileSize(file.size) }}</div>
             <div class="col-span-3">{{ formatDate(file.last_modified) }}</div>
             <div class="col-span-1 flex space-x-2">
                 <button
@@ -110,7 +104,7 @@ const handleDelete = (path, type) => emit("delete", path, type);
 
         <!-- Empty State -->
         <div
-            v-if="!sortedDirectories.length && !sortedFiles.length"
+            v-if="!data.files.length && !data.folders.length"
             class="p-8 text-center text-gray-500"
         >
             This folder is empty
