@@ -49,5 +49,27 @@ class UserTest extends TestCase
         // Assert that the user is authenticated
         $this->assertAuthenticated();
     }
+
+    public function test_user_can_login(): void
+    {
+        // Create a user using a factory
+        $user = \App\Models\User::factory()->create([
+            'password' => bcrypt($password = 'password123'),
+        ]);
+    
+        // Simulate a login request
+        $response = $this->post('/login', [
+            'email' => $user->email,
+            'password' => $password,
+        ]);
+    
+        // Check if the response is a redirect to the intended page after login
+        $response->assertStatus(302);
+        $response->assertRedirect('/dashboard'); // Change to your intended redirect path after login
+    
+        // Assert that the user is authenticated
+        $this->assertAuthenticatedAs($user);
+    }
+    
     
 }
