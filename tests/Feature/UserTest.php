@@ -52,7 +52,10 @@ class UserTest extends TestCase
 
     public function test_user_can_login(): void
     {
-        // Create a user using a factory
+        // Disable CSRF middleware
+        $this->withoutMiddleware();
+    
+        // Create a user with a known password
         $user = \App\Models\User::factory()->create([
             'password' => bcrypt($password = 'password123'),
         ]);
@@ -65,7 +68,7 @@ class UserTest extends TestCase
     
         // Check if the response is a redirect to the intended page after login
         $response->assertStatus(302);
-        $response->assertRedirect('/dashboard'); // Change to your intended redirect path after login
+        $response->assertRedirect('/dashboard');
     
         // Assert that the user is authenticated
         $this->assertAuthenticatedAs($user);
