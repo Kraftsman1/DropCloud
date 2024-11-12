@@ -55,4 +55,20 @@ class FileManagerTest extends TestCase
         $this->assertEquals('folder2', $folders[0]['path']);
         $this->assertEquals('dir', $folders[0]['type']);
     }
+    public function it_falls_back_to_file_extension_when_mime_type_is_unavailable()
+    {
+        Storage::disk('test_disk')->put('unknown_type/file.unknown', 'Some content');
+
+        $fileManager = new \App\Services\FileManagerService(); // Replace with actual service path
+
+        $response = $fileManager->listContents('unknown_type', false);
+
+        $this->assertTrue($response['success']);
+
+        $files = $response['data']['files'];
+        $this->assertCount(1, $files);
+        $this->assertEquals('unknown_type/file.unknown', $files[0]['path']);
+        $this->assertEquals('unknown', $files[0]['mime_type']);
+        $this->assertEquals('unknown', $files[0]['format']);
+    }
 }
