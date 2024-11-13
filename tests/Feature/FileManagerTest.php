@@ -86,4 +86,25 @@ class FileManagerTest extends TestCase
         $this->expectException(\RuntimeException::class);
         $mockFilesystem->listContents('');
     }
+
+    public function it_uploads_a_file_successfully()
+    {
+        // Create a fake file to upload
+        $file = UploadedFile::fake()->create('example.txt', 100); // 100 KB file
+
+        // Define the upload path
+        $filePath = 'uploads/' . $file->hashName();
+
+        // Store the file
+        Storage::disk('test_disk')->putFileAs('uploads', $file, $file->hashName());
+
+        // Assert the file exists on the disk
+        Storage::disk('test_disk')->assertExists($filePath);
+
+        // Optional: Verify file metadata
+        $storedFile = Storage::disk('test_disk')->getMetadata($filePath);
+        $this->assertEquals('example.txt', $file->getClientOriginalName());
+        $this->assertEquals('text/plain', $storedFile['mimetype']);
+        $this->assertEquals(100 * 1024, $storedFile['size']); // 100 KB in bytes
+    }
 }
