@@ -28,6 +28,8 @@ class FileManagerTest extends TestCase
         $this->assertEmpty($response['data']['files']);
         $this->assertEmpty($response['data']['folders']);
     }
+
+    /** @test */
     public function it_lists_files_and_folders_with_correct_metadata()
     {
         // Set up files and folders in the test disk
@@ -55,6 +57,8 @@ class FileManagerTest extends TestCase
         $this->assertEquals('folder2', $folders[0]['path']);
         $this->assertEquals('dir', $folders[0]['type']);
     }
+
+    /** @test */
     public function it_falls_back_to_file_extension_when_mime_type_is_unavailable()
     {
         Storage::disk('test_disk')->put('unknown_type/file.unknown', 'Some content');
@@ -70,5 +74,16 @@ class FileManagerTest extends TestCase
         $this->assertEquals('unknown_type/file.unknown', $files[0]['path']);
         $this->assertEquals('unknown', $files[0]['mime_type']);
         $this->assertEquals('unknown', $files[0]['format']);
+    }
+
+    /** @test */
+    public function it_handles_exception_gracefully()
+    {
+        // Mock the FileSystem to throw an exception
+        $mockFilesystem = Mockery::mock(\App\Services\FileManagerService::class);
+        $mockFilesystem->shouldReceive('listContents')->andThrow(new FilesystemException('Mocked exception'));
+
+        $this->expectException(\RuntimeException::class);
+        $mockFilesystem->listContents('');
     }
 }
