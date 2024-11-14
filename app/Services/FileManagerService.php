@@ -39,7 +39,7 @@ class FileManagerService
     public function setProvider(StorageProvider $provider)
     {
         $this->provider = $provider;
-        $this->filesystem = $provider->getFilesystem($provider);
+        $this->filesystem = $provider->getFilesystem($provider->configuration);
     }
 
     /**

@@ -77,7 +77,8 @@ class StorageProvider extends Model
      */
     public function getFileSystem(array $data = null)
     {
-        $config = $data ?? $this->configuration;
+
+        $config = !empty($data) ? $data : $this->configuration; 
 
         if ($config['driver'] !== 's3') {
             throw new \RuntimeException("Unsupported driver: {$config['driver']}");
