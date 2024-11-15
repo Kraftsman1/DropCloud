@@ -72,8 +72,8 @@ class FileManagerController extends Controller
         
         // Set provider and list files
         $this->fileManagerService->setProvider($activeProvider);
-        $path = $request->input('path', '');
-        
+        $path = $request->route('path', '');
+
         try {
             // Assuming `listContents` requires a `$recursive` argument (use true or false based on requirements)
             $contents = $this->fileManagerService->listContents($path, false);
