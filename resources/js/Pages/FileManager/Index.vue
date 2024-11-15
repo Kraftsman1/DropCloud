@@ -1,6 +1,7 @@
 <script setup>
 import { ref, watch } from "vue";
 import axios from "axios";
+import { router } from "@inertiajs/vue3";
 
 import AppLayout from "@/Layouts/AppLayout.vue";
 import FileContentList from "@/Components/FileManager/FileContentList.vue";
@@ -20,29 +21,22 @@ const props = defineProps({
     },
 });
 
-
 const currentPath = ref("/");
-const currentContents = ref(props.contents.data);
+const currentContents = ref(props.contents);
+
 const isCreatingFolder = ref(false);
 const isUploading = ref(false);
-const selectedItems = ref([])
+const selectedItems = ref([]);
 
-// Watch for path changes
-// watch(currentPath, async (newPath) => {
-//     try {
-//         const response = await axios.get("/file-manager/${props.provider.id}", {
-//             params: {
-//                 path: newPath,
-//             },
-//         });
-//         if (response.data.success) {
-//             currentContents.value = response.data.data;
-//             console.log(response.data.data)
-//         }
-//     } catch (error) {
-//         console.error("Failed to fetch contents:", error);
-//     }
-// });
+const navigateTo = async (path) => {
+    router.get(`/file-manager/${props.provider.id}/${encodeURIComponent(path)}`);
+}
+
+watch(() => props.contents, (newContents) => {
+    currentContents.value = newContents;
+});
+
+
 </script>
 
 <template>
@@ -75,7 +69,7 @@ const selectedItems = ref([])
             <!-- File List -->
 
             <div v-if="contents">
-                <FileContentList :contents="contents" />
+                <FileContentList :contents="currentContents" @navigate="navigateTo" />
             </div>
             <div v-else>
                 <p>No files found.</p>

@@ -6,10 +6,16 @@ const props = defineProps({
     contents: {
         type: Array,
         required: true,
+        default: () => ({
+            data: {
+                folders: [],
+                files: [],
+            },
+        }),
     },
 });
 
-const data = props.contents.data;
+const data = props.contents ? props.contents.data : { folders: [], files: [] };
 
 const emit = defineEmits(["navigate", "download", "delete"]);
 
