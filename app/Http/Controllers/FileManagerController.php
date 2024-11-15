@@ -106,10 +106,11 @@ class FileManagerController extends Controller
      *
      * @throws \RuntimeException If an error occurs while downloading the file.
      */
-    public function download(Request $request)
+    public function download(Request $request, StorageProvider $provider = null, $path = null)
     {
-        $providerId = $request->input('provider_id');
-        $path = $request->input('path');
+
+        $providerId = $provider ? $provider->id : $request->route('provider');
+        $path = $request->route('path');
 
         $provider = StorageProvider::find($providerId);
 
