@@ -1,6 +1,5 @@
 <script setup>
 import { ref, watch } from "vue";
-import axios from "axios";
 import { router } from "@inertiajs/vue3";
 
 import AppLayout from "@/Layouts/AppLayout.vue";
@@ -31,6 +30,16 @@ const selectedItems = ref([]);
 const navigateTo = async (path) => {
     router.get(`/file-manager/${props.provider.id}/${encodeURIComponent(path)}`);
 }
+
+const download = (path) => {
+    if (props.provider && props.provider.id) {
+        const url = `/file-manager/${props.provider.id}/download/${encodeURIComponent(path)}`;
+        // Opens the download in a new tab
+        window.open(url, '_blank');
+    } else {
+        console.error("Provider is not defined or does not have an ID.");
+    }
+};
 
 watch(() => props.contents, (newContents) => {
     currentContents.value = newContents;
@@ -69,7 +78,7 @@ watch(() => props.contents, (newContents) => {
             <!-- File List -->
 
             <div v-if="contents">
-                <FileContentList :contents="currentContents" @navigate="navigateTo" />
+                <FileContentList :contents="currentContents" @navigate="navigateTo" @download="download" />
             </div>
             <div v-else>
                 <p>No files found.</p>
