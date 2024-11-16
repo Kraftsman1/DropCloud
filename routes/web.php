@@ -46,7 +46,7 @@ Route::middleware([
     Route::delete('/storage-providers/{id}', [StorageProviderController::class, 'destroy'])->name('storage-providers.destroy');
 
     Route::get('/file-manager/{provider}', [FileManagerController::class, 'index'])->name('file-manager.index');
-    // Route::get('/file-manager/{provider}/directories', [FileManagerController::class, 'directories'])->name('file-manager.directories');
     Route::get('/file-manager/{provider}/{path}', [FileManagerController::class, 'index'])->name('file-manager.index');
+    Route::get('/file-manager/{provider}/download/{path}', [FileManagerController::class, 'download'])->name('file-manager.download')->where('path', '.*');
 
 });
