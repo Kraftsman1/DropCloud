@@ -154,10 +154,10 @@ class FileManagerController extends Controller
      *
      * @throws \RuntimeException If an error occurs while deleting the file.
      */
-    public function delete(Request $request)
+    public function delete(Request $request, StorageProvider $provider = null, $path = null)
     {
-        $providerId = $request->input('provider_id');
-        $path = $request->input('path');
+        $providerId = $provider ? $provider->id : $request->route('provider');
+        $path = $request->route('path');
 
         $provider = StorageProvider::find($providerId);
 
@@ -171,7 +171,7 @@ class FileManagerController extends Controller
         $this->fileManagerService->setProvider($provider);
 
         try {
-            $this->fileManagerService->deleteFile($path);
+            $this->fileManagerService->delete($path);
             return response()->json([
                 'success' => true,
                 'message' => 'File deleted successfully.',
@@ -183,6 +183,8 @@ class FileManagerController extends Controller
             ], 500);
         }
     }
+
+    // TODO: Implement and Fix File/Folder Upload
 
     /**
      * Upload a file to the storage provider.
@@ -227,5 +229,7 @@ class FileManagerController extends Controller
             ], 500);
         }
     }
+
+    // TODO: Implement and Fix File/Folder Creation
 
 }
