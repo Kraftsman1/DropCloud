@@ -4,7 +4,7 @@ import { FolderIcon, FileIcon, TrashIcon, DownloadIcon } from "lucide-vue-next";
 
 const props = defineProps({
     contents: {
-        type: Array,
+        type: Object,
         required: true,
         default: () => ({
             data: {

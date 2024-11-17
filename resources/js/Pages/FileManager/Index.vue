@@ -1,6 +1,7 @@
 <script setup>
 import { ref, watch } from "vue";
 import { router } from "@inertiajs/vue3";
+import axios from "axios";
 
 import AppLayout from "@/Layouts/AppLayout.vue";
 import FileContentList from "@/Components/FileManager/FileContentList.vue";
@@ -11,7 +12,7 @@ const props = defineProps({
         required: true,
     },
     contents: {
-        type: Array,
+        type: Object,
         required: true,
     },
     error: {
@@ -41,10 +42,45 @@ const download = (path) => {
     }
 };
 
+const handleDelete = async (path, type) => {
+    try {
+        // Confirmation before deletion
+        if (!confirm(`Are you sure you want to delete this ${type}?`)) {
+            return;
+        }
+
+        const encodedPath = encodeURIComponent(path);
+
+        // Wrap the deletion request inside a try-catch
+        try {
+            const response = await axios.delete(`/file-manager/${props.provider.id}/delete/${encodedPath}`);
+            console.log("Delete response:", response.status);
+
+            if (response.status === 200) {
+                alert(`${type.charAt(0).toUpperCase() + type.slice(1)} deleted successfully.`);
+
+                // Update the file list to reflect the deletion
+                router.get(`/file-manager/${props.provider.id}`, {}, {
+                    replace: true,
+                    preserveState: true,
+                });
+            } else {
+                alert(`Failed to delete ${type}.`);
+            }
+        } catch (deleteError) {
+            console.error("Delete request failed:", deleteError);
+            alert(`Failed to delete ${type}.`);
+        }
+
+    } catch (error) {
+        console.error("Delete error:", error);
+        alert(`An error occurred while deleting the ${type}.`);
+    }
+};
+
 watch(() => props.contents, (newContents) => {
     currentContents.value = newContents;
 });
-
 
 </script>
 
@@ -57,16 +93,12 @@ watch(() => props.contents, (newContents) => {
                     {{ provider.name }} - File Manager
                 </h1>
                 <div class="space-x-2">
-                    <button
-                        @click="isCreatingFolder = true"
-                        class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-                    >
+                    <button @click="isCreatingFolder = true"
+                        class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
                         New Folder
                     </button>
-                    <button
-                        @click="isUploading = true"
-                        class="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600"
-                    >
+                    <button @click="isUploading = true"
+                        class="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600">
                         Upload File
                     </button>
                 </div>
@@ -78,7 +110,8 @@ watch(() => props.contents, (newContents) => {
             <!-- File List -->
 
             <div v-if="contents">
-                <FileContentList :contents="currentContents" @navigate="navigateTo" @download="download" />
+                <FileContentList :contents="currentContents" @navigate="navigateTo" @download="download"
+                    @delete="handleDelete" />
             </div>
             <div v-else>
                 <p>No files found.</p>
