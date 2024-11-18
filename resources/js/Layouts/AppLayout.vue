@@ -537,17 +537,17 @@ const logout = () => {
             <main class="flex h-screen bg-gray-100">
                 <!-- Sidebar -->
                 <aside class="w-64 bg-white shadow-md">
-                    <nav class="mt-8">
+                    <nav class="">
                         <Link
                             href="#"
-                            class="flex items-center px-4 py-2 text-blue-600 bg-blue-100"
+                            class="flex items-center px-4 py-4 text-blue-600 bg-blue-100"
                         >
                             <HomeIcon class="mr-3" />
                             Home
                         </Link>
                         <Link
                             href="#"
-                            class="flex items-center px-4 py-2 text-gray-700 hover:bg-gray-100"
+                            class="flex items-center px-4 py-4 text-gray-700 hover:bg-gray-100"
                         >
                             <FolderIcon class="mr-3" />
                             My Files
