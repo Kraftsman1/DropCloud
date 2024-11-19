@@ -1,37 +1,18 @@
-name: Deploy to Fly.io
+# See https://fly.io/docs/app-guides/continuous-deployment-with-github-actions/
 
+name: Fly Deploy
 on:
   push:
     branches:
-    - master
-
+      - main
 jobs:
   deploy:
     name: Deploy app
     runs-on: ubuntu-latest
-
-    concurrency: deploy-group
-
+    concurrency: deploy-group    # optional: ensure only one action runs at a time
     steps:
-      # Checkout the repo
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      # Set up Fly.io CLI
-      - name: Set up Fly.io CLI
-        uses: superfly/flyctl-actions/setup-flyctl@master
-        with:
-          version: latest
-
-      # Deploy the app
-      - name: Deploy to Fly.io
-        run: flyctl deploy --remote-only
+      - uses: actions/checkout@v4
+      - uses: superfly/flyctl-actions/setup-flyctl@master
+      - run: flyctl deploy --remote-only
         env:
           FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
-
-      # Run migrations
-      - name: Run migrations
-        env:
-          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
-        run: |
-          flyctl ssh console --command "php artisan migrate --force"
