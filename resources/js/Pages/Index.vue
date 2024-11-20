@@ -91,7 +91,7 @@ const features = [
 
 
         <!-- Hero Section -->
-        <div class="max-w-7xl mx-auto min-h-screen sm:px-6 lg:px-8 pt-40 pb-16">
+        <div class="max-w-7xl mx-auto min-h-screen sm:px-6 lg:px-8 pt-20 pb-16">
             <main class="container mx-auto px-6 py-16 flex flex-col md:flex-row items-center justify-between">
                 <!-- Left Content -->
                 <div class="max-w-xl mb-12 md:mb-0">
