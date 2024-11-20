@@ -6,7 +6,6 @@ FROM ubuntu:22.04 as base
 LABEL fly_launch_runtime="laravel"
 
 # PHP_VERSION needs to be repeated here
-# See https://docs.docker.com/engine/reference/builder/#understand-how-arg-and-from-interact
 ARG PHP_VERSION
 ENV DEBIAN_FRONTEND=noninteractive \
     COMPOSER_ALLOW_SUPERUSER=1 \
@@ -25,18 +24,17 @@ ENV DEBIAN_FRONTEND=noninteractive \
     PHP_UPLOAD_MAX_FILE_SIZE=100M \
     PHP_ALLOW_URL_FOPEN=Off
 
-# Prepare base container: 
-# 1. Install PHP, Composer
-COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
-COPY .fly/php/ondrej_ubuntu_php.gpg /etc/apt/trusted.gpg.d/ondrej_ubuntu_php.gpg
-ADD .fly/php/packages/${PHP_VERSION}.txt /tmp/php-packages.txt
-
+# Install base dependencies first
 RUN apt-get update \
     && apt-get install -y --no-install-recommends gnupg2 ca-certificates git-core curl zip unzip \
                                                   rsync vim-tiny htop sqlite3 nginx supervisor cron \
     && ln -sf /usr/bin/vim.tiny /etc/alternatives/vim \
-    && ln -sf /etc/alternatives/vim /usr/bin/vim \
-    && echo "deb http://ppa.launchpad.net/ondrej/php/ubuntu jammy main" > /etc/apt/sources.list.d/ondrej-ubuntu-php-focal.list \
+    && ln -sf /etc/alternatives/vim /usr/bin/vim
+
+# Setup PHP repository and install PHP
+COPY .fly/php/ondrej_ubuntu_php.gpg /etc/apt/trusted.gpg.d/ondrej_ubuntu_php.gpg
+ADD .fly/php/packages/${PHP_VERSION}.txt /tmp/php-packages.txt
+RUN echo "deb http://ppa.launchpad.net/ondrej/php/ubuntu jammy main" > /etc/apt/sources.list.d/ondrej-ubuntu-php-focal.list \
     && apt-get update \
     && apt-get -y --no-install-recommends install $(cat /tmp/php-packages.txt) \
     && ln -sf /usr/sbin/php-fpm${PHP_VERSION} /usr/sbin/php-fpm \
@@ -44,76 +42,73 @@ RUN apt-get update \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* /usr/share/doc/*
 
-# 2. Copy config files to proper locations
+# Install Composer
+COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
+
+# Copy configuration files
 COPY .fly/nginx/ /etc/nginx/
 COPY .fly/fpm/ /etc/php/${PHP_VERSION}/fpm/
 COPY .fly/supervisor/ /etc/supervisor/
 COPY .fly/entrypoint.sh /entrypoint
 COPY .fly/start-nginx.sh /usr/local/bin/start-nginx
 RUN chmod 754 /usr/local/bin/start-nginx
-    
-# 3. Copy application code, skipping files based on .dockerignore
-COPY . /var/www/html
+
+# Set up working directory
 WORKDIR /var/www/html
 
-# 4. Setup application dependencies 
-RUN composer install --optimize-autoloader --no-dev \
-    && mkdir -p storage/logs \
+# Copy composer files first
+COPY composer.json composer.lock ./
+
+# Install composer dependencies
+RUN composer install --optimize-autoloader --no-dev
+
+# Now copy the rest of the application
+COPY . .
+
+# Final setup
+RUN mkdir -p storage/logs \
     && php artisan optimize:clear \
     && chown -R www-data:www-data /var/www/html \
     && echo "MAILTO=\"\"\n* * * * * www-data /usr/bin/php /var/www/html/artisan schedule:run" > /etc/cron.d/laravel \
-    && sed -i 's/protected \$proxies/protected \$proxies = "*"/g' app/Http/Middleware/TrustProxies.php;\
-    if [ -d .fly ]; then cp .fly/entrypoint.sh /entrypoint; chmod +x /entrypoint; fi;
+    && sed -i 's/protected \$proxies/protected \$proxies = "*"/g' app/Http/Middleware/TrustProxies.php \
+    && if [ -d .fly ]; then cp .fly/entrypoint.sh /entrypoint; chmod +x /entrypoint; fi
 
-
-
-
-# Multi-stage build: Build static assets
-# This allows us to not include Node within the final container
+# Node.js build stage
 FROM node:${NODE_VERSION} as node_modules_go_brrr
 
 WORKDIR /app
 
-# Copy the entire project first
+# Copy the application first
 COPY . .
 
-# Create vendor directory explicitly
-RUN mkdir -p /app/vendor
+# Copy vendor directory from base stage after it's been fully created
+COPY --from=base /var/www/html/vendor ./vendor
 
-# Copy vendor files from base stage
-COPY --from=base /var/www/html/vendor /app/vendor
-
-# Install and build assets with improved error handling
-RUN set -e; \
-    if [ -f "vite.config.js" ]; then \
+# Install and build assets
+RUN if [ -f "vite.config.js" ]; then \
         ASSET_CMD="build"; \
     else \
         ASSET_CMD="production"; \
     fi; \
-    echo "Using asset command: $ASSET_CMD"; \
     if [ -f "yarn.lock" ]; then \
-        echo "Installing dependencies with Yarn..."; \
-        yarn install --frozen-lockfile --network-timeout 100000; \
+        yarn install --frozen-lockfile; \
         yarn $ASSET_CMD; \
     elif [ -f "pnpm-lock.yaml" ]; then \
-        echo "Installing dependencies with PNPM..."; \
         corepack enable && corepack prepare pnpm@latest-8 --activate; \
         pnpm install --frozen-lockfile; \
         pnpm run $ASSET_CMD; \
     elif [ -f "package-lock.json" ]; then \
-        echo "Installing dependencies with NPM (package-lock.json)..."; \
         npm ci --no-audit; \
         npm run $ASSET_CMD; \
     else \
-        echo "Installing dependencies with NPM (no lock file)..."; \
         npm install; \
         npm run $ASSET_CMD; \
-    fi
+    fi;
 
 # Final stage
 FROM base
 
-# Copy built assets with improved error handling
+# Copy built assets
 COPY --from=node_modules_go_brrr /app/public /var/www/html/public-npm
 RUN rsync -ar /var/www/html/public-npm/ /var/www/html/public/ \
     && rm -rf /var/www/html/public-npm \
