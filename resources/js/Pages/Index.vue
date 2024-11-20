@@ -8,7 +8,7 @@ defineProps({
     canRegister: Boolean,
 });
 
-const appName = import.meta.env.VITE_APP_NAME || 'DropCloud';
+const appName = import.meta.env.VITE_APP_NAME || 'Dropcloud';
 
 const features = [
     {
@@ -43,7 +43,7 @@ const features = [
         <!-- Navigation -->
         <header class="bg-white shadow-md">
             <div class="mx-auto px-4 sm:px-6 lg:px-8">
-                <div class="flex justify-between h-20">
+                <div class="flex justify-between h-16">
                     <!-- Left side -->
                     <div class="flex items-center">
                         <a href="#" class="flex items-center space-x-2">
@@ -67,18 +67,18 @@ const features = [
                         </nav>
                         <div v-if="canLogin" class="flex items-center space-x-4">
                             <Link v-if="$page.props.auth.user" :href="route('dashboard')"
-                                class="inline-flex items-center gap-2 rounded border border-indigo-600 bg-indigo-600 px-8 py-3 text-white hover:bg-transparent hover:text-indigo-600 focus:outline-none focus:ring active:text-indigo-500">
+                                class="inline-flex items-center gap-2 rounded border border-blue-600 bg-blue-600 px-4 py-2 text-white hover:bg-transparent hover:text-blue-600 focus:outline-none focus:ring active:text-blue-500">
                             Dashboard
                             </Link>
 
                             <template v-else>
                                 <Link :href="route('login')"
-                                    class="inline-flex items-center gap-2 rounded border border-indigo-600 px-8 py-3 text-indigo-600 hover:bg-indigo-600 hover:text-white focus:outline-none focus:ring active:bg-indigo-500">
+                                    class="inline-flex items-center gap-2 rounded border border-blue-600 px-4 py-2 text-blue-600 hover:bg-blue-600 hover:text-white focus:outline-none focus:ring active:bg-blue-500">
                                 Log in
                                 </Link>
 
                                 <Link v-if="canRegister" :href="route('register')"
-                                    class="inline-flex items-center gap-2 rounded border border-indigo-600 bg-indigo-600 px-8 py-3 text-white hover:bg-transparent hover:text-indigo-600 focus:outline-none focus:ring active:text-indigo-500">
+                                    class="inline-flex items-center gap-2 rounded border border-blue-600 bg-blue-600 px-4 py-2 text-white hover:bg-transparent hover:text-blue-600 focus:outline-none focus:ring active:text-blue-500">
                                 Register
                                 </Link>
                             </template>
@@ -91,7 +91,7 @@ const features = [
 
 
         <!-- Hero Section -->
-        <div class="max-w-7xl mx-auto min-h-screen sm:px-6 lg:px-8 pt-20 pb-16">
+        <div class="max-w-7xl mx-auto min-h-full sm:px-6 lg:px-8 pt-20 pb-16">
             <main class="container mx-auto px-6 py-16 flex flex-col md:flex-row items-center justify-between">
                 <!-- Left Content -->
                 <div class="max-w-xl mb-12 md:mb-0">
@@ -102,15 +102,10 @@ const features = [
                         Store, share, and collaborate on files and folders from any mobile device, tablet, or computer
                     </p>
                     <div class="flex items-center space-x-4">
-                        <button
-                            class="px-8 py-3 bg-blue-600 rounded-lg font-semibold hover:bg-blue-700 transition-colors">
+                        <Link :href="route('register')"
+                            class="inline-flex items-center gap-2 rounded border border-blue-600 bg-blue-600 px-4 py-2 text-white hover:bg-transparent hover:text-blue-600 focus:outline-none focus:ring active:text-blue-500">
                             Get Started
-                        </button>
-                        <button
-                            class="flex items-center space-x-2 px-4 py-3 hover:bg-gray-800 rounded-lg transition-colors">
-                            <span class="w-4 h-4">▶</span>
-                            <span>Request a demo</span>
-                        </button>
+                    </Link>
                     </div>
 
                     <!-- Stats -->
