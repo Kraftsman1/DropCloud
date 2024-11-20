@@ -1,5 +1,6 @@
 # syntax = docker/dockerfile:experimental
 
+# Explicitly set PHP version to 8.2
 ARG PHP_VERSION=8.2
 ARG NODE_VERSION=18
 FROM ubuntu:22.04 as base
@@ -33,7 +34,7 @@ RUN apt-get update \
 
 # Setup PHP repository and install PHP
 COPY .fly/php/ondrej_ubuntu_php.gpg /etc/apt/trusted.gpg.d/ondrej_ubuntu_php.gpg
-ADD .fly/php/packages/${PHP_VERSION}.txt /tmp/php-packages.txt
+ADD .fly/php/packages/8.2.txt /tmp/php-packages.txt
 RUN echo "deb http://ppa.launchpad.net/ondrej/php/ubuntu jammy main" > /etc/apt/sources.list.d/ondrej-ubuntu-php-focal.list \
     && apt-get update \
     && apt-get -y --no-install-recommends install $(cat /tmp/php-packages.txt) \
