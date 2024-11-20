@@ -1,6 +1,5 @@
 # syntax = docker/dockerfile:experimental
 
-# Explicitly set PHP version to 8.2
 ARG PHP_VERSION=8.2
 ARG NODE_VERSION=18
 FROM ubuntu:22.04 as base
@@ -57,17 +56,13 @@ RUN chmod 754 /usr/local/bin/start-nginx
 # Set up working directory
 WORKDIR /var/www/html
 
-# Copy composer files first
-COPY composer.json composer.lock ./
-
-# Install composer dependencies
-RUN composer install --optimize-autoloader --no-dev
-
-# Now copy the rest of the application
+# Copy the entire application first
 COPY . .
 
-# Final setup
-RUN mkdir -p storage/logs \
+# Install composer dependencies
+RUN composer install --optimize-autoloader --no-dev \
+    && php artisan package:discover --ansi \
+    && mkdir -p storage/logs \
     && php artisan optimize:clear \
     && chown -R www-data:www-data /var/www/html \
     && echo "MAILTO=\"\"\n* * * * * www-data /usr/bin/php /var/www/html/artisan schedule:run" > /etc/cron.d/laravel \
