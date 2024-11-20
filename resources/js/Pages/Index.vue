@@ -1,6 +1,7 @@
 <script setup>
 import { Head, Link } from '@inertiajs/vue3';
 import ApplicationMark from "@/Components/ApplicationMark.vue";
+import Footer from "@/Components/Footer.vue";
 import { CloudIcon, FolderIcon, ShareIcon, ShieldCheckIcon } from 'lucide-vue-next';
 
 defineProps({
@@ -209,62 +210,6 @@ const features = [
         </section>
 
         <!-- Footer -->
-        <footer class="bg-black text-white px-6 py-16">
-            <div class="max-w-7xl mx-auto grid md:grid-cols-4 gap-8">
-                <div>
-                    <h3 class="font-bold mb-4">DropCloud</h3>
-                    <ul class="space-y-2">
-                        <li>
-                            <Link href="#" class="hover:text-gray-300">Desktop app</Link>
-                        </li>
-                        <li>
-                            <Link href="#" class="hover:text-gray-300">Mobile app</Link>
-                        </li>
-                        <li>
-                            <Link href="#" class="hover:text-gray-300">Features</Link>
-                        </li>
-                        <li>
-                            <Link href="#" class="hover:text-gray-300">Security</Link>
-                        </li>
-                    </ul>
-                </div>
-
-                <div>
-                    <h3 class="font-bold mb-4">Products</h3>
-                    <ul class="space-y-2">
-                        <li>
-                            <Link href="#" class="hover:text-gray-300">Plus</Link>
-                        </li>
-                        <li>
-                            <Link href="#" class="hover:text-gray-300">Professional</Link>
-                        </li>
-                        <li>
-                            <Link href="#" class="hover:text-gray-300">Business</Link>
-                        </li>
-                        <li>
-                            <Link href="#" class="hover:text-gray-300">Enterprise</Link>
-                        </li>
-                    </ul>
-                </div>
-
-                <div>
-                    <h3 class="font-bold mb-4">Support</h3>
-                    <ul class="space-y-2">
-                        <li>
-                            <Link href="#" class="hover:text-gray-300">Help center</Link>
-                        </li>
-                        <li>
-                            <Link href="#" class="hover:text-gray-300">Contact us</Link>
-                        </li>
-                        <li>
-                            <Link href="#" class="hover:text-gray-300">Privacy & terms</Link>
-                        </li>
-                        <li>
-                            <Link href="#" class="hover:text-gray-300">Cookie policy</Link>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-        </footer>
+        <Footer />
     </div>
 </template>
