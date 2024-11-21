@@ -45,9 +45,11 @@ Route::middleware([
     Route::put('/storage-providers/{id}', [StorageProviderController::class, 'update'])->name('storage-providers.update');
     Route::delete('/storage-providers/{id}', [StorageProviderController::class, 'destroy'])->name('storage-providers.destroy');
 
-    Route::get('/file-manager/{provider}', [FileManagerController::class, 'index'])->name('file-manager.index');
-    Route::get('/file-manager/{provider}/{path}', [FileManagerController::class, 'index'])->name('file-manager.index');
-    Route::get('/file-manager/{provider}/download/{path}', [FileManagerController::class, 'download'])->name('file-manager.download')->where('path', '.*');
-    Route::delete('/file-manager/{provider}/delete/{path}', [FileManagerController::class, 'delete'])->name('file-manager.delete')->where('path', '.*');
+    // File Manager Route Group
+    Route::prefix('file-manager')->group(function () {
+        Route::get('/{provider}/{path?}', [FileManagerController::class, 'index'])->name('file-manager.index');
+        Route::get('/{provider}/download/{path}', [FileManagerController::class, 'download'])->name('file-manager.download')->where('path', '.*');
+        Route::delete('/{provider}/delete/{path}', [FileManagerController::class, 'delete'])->name('file-manager.delete')->where('path', '.*');
+    });
 
 });
