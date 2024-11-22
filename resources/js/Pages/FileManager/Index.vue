@@ -49,27 +49,6 @@ const clearMessage = () => {
     actionMessage.value = null;
 };
 
-// API Calls
-const updateContents = async () => {
-    isLoading.value = true;
-    try {
-        const response = await axios.get(`/file-manager/${props.provider.id}${currentPath.value}`);
-
-        console.log("Response:", response);
-        currentContents.value = response.data.contents;
-
-        // Sync currentPath from server response if available
-        if (response.data.currentPath) {
-            currentPath.value = response.data.currentPath;
-        }
-    } catch (error) {
-        showMessage(`Failed to refresh contents: ${error.message}`, "error");
-        console.error("Error fetching contents:", error);
-    } finally {
-        isLoading.value = false;
-    }
-};
-
 const navigateTo = (path) => {
     currentPath.value = path;
     router.get(`/file-manager/${props.provider.id}/${path}`);
@@ -105,7 +84,8 @@ const handleDelete = async () => {
             (item) => item.path !== activeItem.value.path
         );
 
-        await updateContents();
+        location.reload();
+
 
     } catch (error) {
         showMessage(`Failed to delete ${activeItem.value.name}: ${error.message}`, "error");
