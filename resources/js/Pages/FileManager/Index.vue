@@ -1,4 +1,3 @@
-<!-- FileManager.vue -->
 <script setup>
 import { ref, watch } from "vue";
 import { router } from "@inertiajs/vue3";
@@ -9,62 +8,62 @@ import FileContentList from "@/Components/FileManager/FileContentList.vue";
 import ConfirmationModal from "@/Components/ConfirmationModal.vue";
 import ActionMessage from "@/Components/ActionMessage.vue";
 
+// Props
 const props = defineProps({
-    provider: {
-        type: Object,
-        required: true,
+    provider: { 
+        type: Object, 
+        required: true 
     },
-    contents: {
-        type: Object,
-        required: true,
+    contents: { 
+        type: Object, 
+        required: true 
     },
-    error: {
-        type: String,
-        default: null,
+    error: { 
+        type: String, 
+        default: null 
     },
 });
 
-// State Management with more descriptive names
-const currentPath = ref("/");
+// State Management
+const currentPath = ref(props.contents?.path || "/");
 const currentContents = ref(props.contents);
 const selectedItems = ref([]);
 const actionMessage = ref(null);
-const messageTimeout = ref(null);
+const isLoading = ref(false);
+const isDeleting = ref(false);
 
 // Modal States
 const showDeleteModal = ref(false);
 const showCreateFolderModal = ref(false);
 const showUploadModal = ref(false);
 
-// Active item and loading state
+// Active item
 const activeItem = ref(null);
-const isLoading = ref(false);
 
-// Composable functions for better organization
-const showActionMessage = (message, type = 'success') => {
-    actionMessage.value = {
-        text: message,
-        type: type,
-    };
-
-    if (messageTimeout.value) {
-        clearTimeout(messageTimeout.value);
-    }
-
-    messageTimeout.value = setTimeout(() => {
-        actionMessage.value = null;
-    }, 5000);
+// Helper Functions
+const showMessage = (text, type = "success") => {
+    actionMessage.value = { text, type };
 };
 
+const clearMessage = () => {
+    actionMessage.value = null;
+};
+
+// API Calls
 const updateContents = async () => {
     isLoading.value = true;
     try {
-        const response = await axios.get(
-            `/file-manager/${props.provider.id}${currentPath.value}`
-        );
+        const response = await axios.get(`/file-manager/${props.provider.id}${currentPath.value}`);
+
+        console.log("Response:", response);
         currentContents.value = response.data.contents;
+
+        // Sync currentPath from server response if available
+        if (response.data.currentPath) {
+            currentPath.value = response.data.currentPath;
+        }
     } catch (error) {
-        showActionMessage(`Failed to refresh contents: ${error.message}`, "error");
+        showMessage(`Failed to refresh contents: ${error.message}`, "error");
         console.error("Error fetching contents:", error);
     } finally {
         isLoading.value = false;
@@ -73,43 +72,46 @@ const updateContents = async () => {
 
 const navigateTo = (path) => {
     currentPath.value = path;
-    router.get(`/file-manager/${props.provider.id}${path}`);
+    router.get(`/file-manager/${props.provider.id}/${path}`);
 };
 
 const download = (path) => {
     if (!props.provider?.id) {
-        showActionMessage("Provider information is missing", "error");
+        showMessage("Provider information is missing", "error");
         return;
     }
-    
     const url = `/file-manager/${props.provider.id}/download/${encodeURIComponent(path)}`;
-    window.open(url, '_blank');
+    window.open(url, "_blank");
 };
 
 const handleDelete = async () => {
-    if (!activeItem.value) return;
+    if (!activeItem.value || !props.provider?.id) {
+        showMessage("No item selected or provider information missing.", "error");
+        return;
+    }
 
     try {
+        isDeleting.value = true;
         const encodedPath = encodeURIComponent(activeItem.value.path);
-        const response = await axios.delete(
-            `/file-manager/${props.provider.id}/delete/${encodedPath}`
+        await axios.delete(`/file-manager/${props.provider.id}/delete/${encodedPath}`);
+
+        // Close the modal immediately
+        showDeleteModal.value = false;
+
+        showMessage(`${activeItem.value.name} deleted successfully`);
+
+        // Remove the deleted item from selectedItems
+        selectedItems.value = selectedItems.value.filter(
+            (item) => item.path !== activeItem.value.path
         );
 
-        if (response.status === 200) {
-            showActionMessage(`${activeItem.value.type} deleted successfully`);
-            await updateContents();
-            // Clear selection if deleted item was selected
-            selectedItems.value = selectedItems.value.filter(
-                item => item.path !== activeItem.value.path
-            );
-        }
+        await updateContents();
+
     } catch (error) {
-        showActionMessage(
-            `Failed to delete ${activeItem.value.type}: ${error.message}`,
-            "error"
-        );
+        showMessage(`Failed to delete ${activeItem.value.name}: ${error.message}`, "error");
+        console.error("Delete Error:", error);
     } finally {
-        showDeleteModal.value = false;
+        isDeleting.value = false;
         activeItem.value = null;
     }
 };
@@ -119,16 +121,22 @@ const confirmDelete = (item) => {
     showDeleteModal.value = true;
 };
 
-// Cleanup
-// onBeforeUnmount(() => {
-//     if (messageTimeout.value) {
-//         clearTimeout(messageTimeout.value);
-//     }
-// });
+const closeDeleteModal = () => {
+    showDeleteModal.value = false;
+    activeItem.value = null;
+};
 
-// Watch for contents changes
-watch(() => props.contents, (newContents) => {
-    currentContents.value = newContents;
+// Watch for `props.contents` changes
+watch(
+    () => props.contents,
+    (newContents) => {
+        currentContents.value = newContents;
+    }
+);
+
+// Debugging (Optional)
+watch(currentPath, (newPath) => {
+    console.log("Current path updated to:", newPath);
 });
 </script>
 
@@ -141,77 +149,51 @@ watch(() => props.contents, (newContents) => {
                     {{ provider.name }} - File Manager
                 </h1>
                 <div class="space-x-2">
-                    <button
-                        @click="showCreateFolderModal = true"
-                        class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition"
-                    >
+                    <button @click="showCreateFolderModal = true"
+                        class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition">
                         New Folder
                     </button>
-                    <button
-                        @click="showUploadModal = true"
-                        class="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 transition"
-                    >
+                    <button @click="showUploadModal = true"
+                        class="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 transition">
                         Upload File
                     </button>
                 </div>
             </div>
 
             <!-- Action Message -->
-            <ActionMessage
-                v-if="actionMessage"
-                :message="actionMessage.text"
-                :type="actionMessage.type"
-            />
+            <ActionMessage v-if="actionMessage" :message="actionMessage.text" :type="actionMessage.type"
+                @close="clearMessage" />
 
             <!-- Loading State -->
-            <div
-                v-if="isLoading"
-                class="flex justify-center items-center py-8"
-            >
-                <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500" />
+            <div v-if="isLoading" class="flex justify-center items-center py-8">
+                <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
             </div>
 
             <!-- File List -->
             <div v-if="currentContents">
-                <FileContentList
-                    :contents="currentContents"
-                    :selected-items="selectedItems"
-                    @navigate="navigateTo"
-                    @download="download"
-                    @delete="confirmDelete"
-                    @select="item => selectedItems.push(item)"
-                    @deselect="item => selectedItems = selectedItems.filter(i => i.path !== item.path)"
-                />
+                <FileContentList :contents="currentContents" :selected-items="selectedItems" @navigate="navigateTo"
+                    @download="download" @delete="confirmDelete" @select="(item) => selectedItems.push(item)" @deselect="(item) =>
+                        (selectedItems = selectedItems.filter((i) => i.path !== item.path))" />
             </div>
             <div v-else class="text-center py-8 text-gray-500">
                 No files found.
             </div>
 
             <!-- Delete Confirmation Modal -->
-            <ConfirmationModal
-                :show="showDeleteModal"
-                @close="showDeleteModal = false"
-                @confirm="handleDelete"
-            >
-                <template #title>
-                    Confirm Delete
-                </template>
+            <ConfirmationModal :show="showDeleteModal" @close="closeDeleteModal">
+                <template #title>Confirm Delete</template>
                 <template #content>
-                    Are you sure you want to delete 
+                    Are you sure you want to delete
                     <span class="font-semibold">{{ activeItem?.name }}</span>?
                     This action cannot be undone.
                 </template>
                 <template #footer>
-                    <button
-                        @click="handleDelete"
-                        class="bg-red-600 text-white px-4 py-2 rounded mr-2 hover:bg-red-700 transition"
-                    >
-                        Delete
+                    <button @click="handleDelete" :disabled="isDeleting"
+                        class="bg-red-600 text-white px-4 py-2 rounded mr-2 hover:bg-red-700 transition disabled:opacity-50">
+                        {{ isDeleting ? "Deleting..." : "Delete" }}
                     </button>
-                    <button
-                        @click="showDeleteModal = false"
-                        class="bg-gray-300 text-black px-4 py-2 rounded hover:bg-gray-400 transition"
-                    >
+                    <button @click="closeDeleteModal"
+                        class="bg-gray-300 text-black px-4 py-2 rounded hover:bg-gray-400 transition">
                         Cancel
                     </button>
                 </template>
