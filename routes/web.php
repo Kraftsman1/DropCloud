@@ -36,14 +36,17 @@ Route::middleware([
         return Inertia::render('Dashboard');
     })->name('dashboard');
 
-    Route::get('/storage-providers', [StorageProviderController::class, 'index'])->name('storage-providers.index');
-    Route::get('/storage-providers/create', [StorageProviderController::class, 'create'])->name('storage-providers.create');
-    Route::post('/storage-providers/test-connection', [StorageProviderController::class, 'testConnection'])->name('storage-providers.test-connection');
-    Route::post('/storage-providers', [StorageProviderController::class, 'store'])->name('storage-providers.store');
-    Route::get('/storage-providers/{id}', [StorageProviderController::class, 'show'])->name('storage-providers.show');
-    Route::get('/storage-providers/{id}/edit', [StorageProviderController::class, 'edit'])->name('storage-providers.edit');
-    Route::put('/storage-providers/{id}', [StorageProviderController::class, 'update'])->name('storage-providers.update');
-    Route::delete('/storage-providers/{id}', [StorageProviderController::class, 'destroy'])->name('storage-providers.destroy');
+    // Storage Provider Route Group
+    Route::prefix('storage-providers')->group(function () {
+        Route::get('/', [StorageProviderController::class, 'index'])->name('storage-providers.index');
+        Route::get('/create', [StorageProviderController::class, 'create'])->name('storage-providers.create');
+        Route::post('/test-connection', [StorageProviderController::class, 'testConnection'])->name('storage-providers.test-connection');
+        Route::post('/', [StorageProviderController::class, 'store'])->name('storage-providers.store');
+        Route::get('/{id}', [StorageProviderController::class, 'show'])->name('storage-providers.show');
+        Route::get('/{id}/edit', [StorageProviderController::class, 'edit'])->name('storage-providers.edit');
+        Route::put('/{id}', [StorageProviderController::class, 'update'])->name('storage-providers.update');
+        Route::delete('/{id}', [StorageProviderController::class, 'destroy'])->name('storage-providers.destroy');
+    });
 
     // File Manager Route Group
     Route::prefix('file-manager')->group(function () {
