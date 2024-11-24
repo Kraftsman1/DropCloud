@@ -1,6 +1,7 @@
 <script setup>
-import { ref, reactive, computed } from "vue";
-import { UploadIcon, XIcon, Trash2Icon } from "lucide-vue-next";
+import { ref, reactive, computed, watch } from "vue";
+import { UploadIcon, XIcon, Trash2Icon, ImageIcon } from "lucide-vue-next";
+import axios from "axios";
 
 const props = defineProps({
     show: {
@@ -19,128 +20,208 @@ const props = defineProps({
 
 const emit = defineEmits(["close", "uploaded"]);
 
+// State management
 const dragOver = ref(false);
 const uploading = ref(false);
 const state = reactive({
     files: [],
-    errorMessage: "",
+    errorMessages: [],
+    uploadProgress: {},
+    cancelTokens: {}
 });
 
 // Configuration
 const MAX_FILES = 10;
 const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50MB
-const ALLOWED_TYPES = [
-    "image/jpeg",
-    "image/png",
-    "image/gif",
-    "application/pdf",
-    "text/plain",
-    "application/msword",
-    "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-    "application/vnd.ms-excel",
-    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-];
-
-const validateFile = (file) => {
-    if (file.size > MAX_FILE_SIZE) {
-        state.errorMessage = `File "${file.name}" exceeds the 50MB size limit.`;
-        return false;
-    }
-    if (!ALLOWED_TYPES.includes(file.type)) {
-        state.errorMessage = `File type for "${file.name}" is not supported.`;
-        return false;
-    }
-    return true;
+const ALLOWED_TYPES = {
+    'image/jpeg': 'JPEG',
+    'image/png': 'PNG', 
+    'image/gif': 'GIF',
+    'application/pdf': 'PDF',
+    'text/plain': 'TXT',
+    'application/msword': 'DOC',
+    'application/vnd.openxmlformats-officedocument.wordprocessingml.document': 'DOCX',
+    'application/vnd.ms-excel': 'XLS',
+    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': 'XLSX'
 };
 
-const handleDrop = (e) => {
+// Generate file preview
+const generateFilePreview = (file) => {
+    return new Promise((resolve) => {
+        if (file.type.startsWith('image/')) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                resolve(e.target.result);
+            };
+            reader.readAsDataURL(file);
+        } else {
+            resolve(null);
+        }
+    });
+};
+
+// Enhanced validation with multiple error messages
+const validateFile = async (file) => {
+    const errors = [];
+
+    if (file.size > MAX_FILE_SIZE) {
+        errors.push(`"${file.name}": Exceeds 50MB size limit`);
+    }
+
+    if (!ALLOWED_TYPES[file.type]) {
+        errors.push(`"${file.name}": Unsupported file type`);
+    }
+
+    // Optional: Add more sophisticated validation
+    const preview = file.type.startsWith('image/') ? await generateFilePreview(file) : null;
+
+    return {
+        file,
+        preview,
+        errors
+    };
+};
+
+const handleDrop = async (e) => {
     e.preventDefault();
     dragOver.value = false;
-    state.errorMessage = "";
+    state.errorMessages = [];
 
     const droppedFiles = e.dataTransfer?.files;
     if (droppedFiles?.length) {
-        addFiles(Array.from(droppedFiles));
+        await addFiles(Array.from(droppedFiles));
     }
 };
 
-const handleFileSelect = (e) => {
+const handleFileSelect = async (e) => {
     const selectedFiles = e.target.files;
     if (selectedFiles?.length) {
-        addFiles(Array.from(selectedFiles));
+        await addFiles(Array.from(selectedFiles));
     }
 };
 
-const addFiles = (newFiles) => {
-    // Filter out already added files and validate new ones
-    const uniqueNewFiles = newFiles.filter(
-        newFile => !state.files.some(existingFile => existingFile.name === newFile.name)
+const addFiles = async (newFiles) => {
+    state.errorMessages = [];
+
+    // Validate and process files
+    const processedFiles = await Promise.all(
+        newFiles.map(validateFile)
     );
 
-    const validFiles = uniqueNewFiles.filter(validateFile);
-
-    // Check total files limit
-    const totalFiles = state.files.length + validFiles.length;
-    if (totalFiles > MAX_FILES) {
-        state.errorMessage = `Maximum of ${MAX_FILES} files allowed.`;
+    // Collect errors
+    const fileErrors = processedFiles.flatMap(f => f.errors);
+    if (fileErrors.length) {
+        state.errorMessages = fileErrors;
         return;
     }
 
-    state.files = [...state.files, ...validFiles];
+    // Filter out duplicates and validate total files
+    const uniqueNewFiles = processedFiles.filter(
+        newFile => !state.files.some(
+            existingFile => existingFile.file.name === newFile.file.name
+        )
+    );
+
+    const totalFiles = state.files.length + uniqueNewFiles.length;
+    if (totalFiles > MAX_FILES) {
+        state.errorMessages.push(`Maximum of ${MAX_FILES} files allowed`);
+        return;
+    }
+
+    state.files = [...state.files, ...uniqueNewFiles];
 };
 
 const removeFile = (fileToRemove) => {
+    // Cancel ongoing upload if exists
+    if (state.cancelTokens[fileToRemove.file.name]) {
+        state.cancelTokens[fileToRemove.file.name].cancel('Upload cancelled by user');
+    }
+
     state.files = state.files.filter(file => file !== fileToRemove);
-    state.errorMessage = ""; // Clear any previous error messages
+    delete state.uploadProgress[fileToRemove.file.name];
+    delete state.cancelTokens[fileToRemove.file.name];
+    state.errorMessages = [];
 };
 
 const handleUpload = async () => {
     if (!state.files.length) return;
 
     uploading.value = true;
-    state.errorMessage = "";
+    state.errorMessages = [];
 
     try {
         const formData = new FormData();
-        formData.append("path", props.currentPath);
+        formData.append("providerId", props.provider.id);
+        formData.append("path", props.currentPath || '/');
 
-        state.files.forEach(file => {
-            formData.append("files[]", file);
+        // Explicitly use file property and ensure correct file object
+        state.files.forEach((fileObj, index) => {
+            console.log(`Adding file ${index}:`, {
+                name: fileObj.file.name,
+                type: fileObj.file.type,
+                size: fileObj.file.size
+            });
+            formData.append("files[]", fileObj.file);
         });
 
-        const response = await axios.post(
-            `/file-manager/${props.provider.id}/upload/`,
-            formData,
-            {
-                headers: {
-                    "Content-Type": "multipart/form-data",
-                },
-            }
-        );
+        // Debug: Log FormData contents
+        for (let [key, value] of formData.entries()) {
+            console.log(`FormData - ${key}:`, value);
+        }
 
+        const response = await axios.post(`/file-manager/${props.provider.id}/upload`, formData, {
+            headers: {
+                "Content-Type": "multipart/form-data",
+            },
+            // Add more detailed logging
+            transformRequest: [function (data, headers) {
+                console.log('Request Data:', data);
+                return data;
+            }]
+            
+        });
+        
+        // Debug: Log response data
+        console.log('Upload Response:', response.data);
+
+        // Handle successful upload
         state.files = [];
-
-        showMessage(response.data.message);
-
         emit("uploaded", props.currentPath);
         emit("close");
     } catch (error) {
-        state.errorMessage = `Upload failed: ${error.response?.data?.message || error.message}`;
-        console.error("Upload Error:", error);
+        const errorMessage = error.response?.data?.error 
+            || error.response?.data?.message 
+            || error.message 
+            || 'Unknown upload error';
+
+        state.errorMessages.push(`Upload failed: ${errorMessage}`);
+        
+        console.error('Upload Error Details:', {
+            status: error.response?.status,
+            data: error.response?.data,
+            message: errorMessage,
+            url: error.config?.url
+        });
     } finally {
         uploading.value = false;
     }
 };
-
-// Computed for total file size and count
+// Computed properties
 const totalFileSize = computed(() =>
-    state.files.reduce((total, file) => total + file.size, 0)
+    state.files.reduce((total, fileObj) => total + fileObj.file.size, 0)
 );
+
+const overallUploadProgress = computed(() => {
+    const progresses = Object.values(state.uploadProgress);
+    return progresses.length 
+        ? progresses.reduce((a, b) => a + b, 0) / progresses.length 
+        : 0;
+});
 </script>
 
 <template>
     <div v-if="show" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-        <div class="bg-white rounded-lg p-6 max-w-md w-full shadow-xl" role="dialog"
+        <div class="bg-white rounded-lg p-6 max-w-lg w-full shadow-xl" role="dialog"
             aria-labelledby="upload-dialog-title" aria-modal="true">
             <!-- Header -->
             <div class="flex justify-between items-center mb-4">
@@ -165,8 +246,15 @@ const totalFileSize = computed(() =>
                     <label class="text-blue-500 hover:text-blue-700 cursor-pointer">
                         browse
                         <input type="file" class="hidden" @change="handleFileSelect" multiple
-                            :accept="ALLOWED_TYPES.join(',')" />
+                            :accept="Object.keys(ALLOWED_TYPES).join(',')" />
                     </label>
+                </div>
+
+                <!-- Error Messages -->
+                <div v-if="state.errorMessages.length" class="text-red-500 text-sm mb-4">
+                    <p v-for="(error, index) in state.errorMessages" :key="index">
+                        {{ error }}
+                    </p>
                 </div>
 
                 <!-- Selected Files List -->
@@ -178,44 +266,78 @@ const totalFileSize = computed(() =>
                             ({{ (totalFileSize / (1024 * 1024)).toFixed(2) }}MB)
                         </span>
                     </div>
-                    <ul class="space-y-1 max-h-40 overflow-y-auto">
-                        <li v-for="file in state.files" :key="file.name"
-                            class="flex justify-between items-center text-sm text-gray-600 bg-gray-100 p-2 rounded">
-                            <span class="truncate max-w-[70%]">{{ file.name }}</span>
-                            <div class="flex items-center space-x-2">
-                                <span class="text-xs text-gray-500">
-                                    {{ (file.size / 1024).toFixed(1) }}KB
-                                </span>
-                                <button @click="removeFile(file)" class="text-red-500 hover:text-red-700"
-                                    aria-label="Remove file">
-                                    <Trash2Icon class="w-4 h-4" />
-                                </button>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-2 max-h-60 overflow-y-auto">
+                        <div v-for="fileObj in state.files" :key="fileObj.file.name"
+                            class="flex items-center bg-gray-100 p-2 rounded">
+                            <!-- File Preview -->
+                            <div class="mr-2">
+                                <img v-if="fileObj.preview" :src="fileObj.preview" 
+                                    class="w-12 h-12 object-cover rounded" />
+                                <ImageIcon v-else class="w-12 h-12 text-gray-400" />
                             </div>
-                        </li>
-                    </ul>
-                </div>
-            </div>
 
-            <!-- Error Message -->
-            <div v-if="state.errorMessage" class="text-red-500 text-sm mt-2">
-                {{ state.errorMessage }}
+                            <div class="flex-grow">
+                                <div class="flex justify-between items-center">
+                                    <span class="text-sm truncate max-w-[70%]">
+                                        {{ fileObj.file.name }}
+                                    </span>
+                                    <button @click="removeFile(fileObj)" 
+                                        class="text-red-500 hover:text-red-700"
+                                        aria-label="Remove file">
+                                        <Trash2Icon class="w-4 h-4" />
+                                    </button>
+                                </div>
+                                
+                                <!-- Upload Progress -->
+                                <div v-if="uploading" class="w-full bg-gray-200 rounded-full h-1.5 mt-1">
+                                    <div class="bg-blue-600 h-1.5 rounded-full" 
+                                        :style="{width: `${state.uploadProgress[fileObj.file.name] || 0}%`}">
+                                    </div>
+                                </div>
+
+                                <div class="text-xs text-gray-500 flex justify-between">
+                                    <span>
+                                        {{ ALLOWED_TYPES[fileObj.file.type] || 'Unknown' }}
+                                    </span>
+                                    <span>
+                                        {{ (fileObj.file.size / 1024).toFixed(1) }}KB
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Overall Upload Progress -->
+                <div v-if="uploading" class="mt-4">
+                    <div class="w-full bg-gray-200 rounded-full h-2.5">
+                        <div class="bg-blue-600 h-2.5 rounded-full" 
+                            :style="{width: `${overallUploadProgress}%`}">
+                        </div>
+                    </div>
+                    <p class="text-sm text-gray-600 mt-1">
+                        Overall Progress: {{ Math.round(overallUploadProgress) }}%
+                    </p>
+                </div>
             </div>
 
             <!-- Upload Information -->
             <div class="text-xs text-gray-500 mt-2">
-                <p>Supported file types: PDF, JPEG, PNG, GIF, TXT, DOCX, XLSX</p>
+                <p>Supported file types: {{ Object.values(ALLOWED_TYPES).join(', ') }}</p>
                 <p>Maximum file size: 50MB per file</p>
                 <p>Maximum total files: {{ MAX_FILES }}</p>
             </div>
 
             <!-- Actions -->
             <div class="flex justify-end mt-4 space-x-2">
-                <button @click="$emit('close')" class="px-4 py-2 text-gray-600 hover:text-gray-800 transition">
+                <button @click="$emit('close')" 
+                    class="px-4 py-2 text-gray-600 hover:text-gray-800 transition">
                     Cancel
                 </button>
-                <button @click="handleUpload" :disabled="!state.files.length || uploading"
+                <button @click="handleUpload" 
+                    :disabled="!state.files.length || uploading"
                     class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 disabled:opacity-50 transition">
-                    {{ uploading ? "Uploading..." : "Upload" }}
+                    {{ uploading ? `Uploading (${Math.round(overallUploadProgress)}%)` : "Upload" }}
                 </button>
             </div>
         </div>
