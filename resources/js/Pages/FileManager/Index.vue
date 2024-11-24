@@ -5,6 +5,7 @@ import axios from "axios";
 
 import AppLayout from "@/Layouts/AppLayout.vue";
 import FileContentList from "@/Components/FileManager/FileContentList.vue";
+import UploadModal from "@/Components/FileManager/UploadModal.vue";
 import ConfirmationModal from "@/Components/ConfirmationModal.vue";
 import ActionMessage from "@/Components/ActionMessage.vue";
 
@@ -61,6 +62,33 @@ const download = (path) => {
     }
     const url = `/file-manager/${props.provider.id}/download/${encodeURIComponent(path)}`;
     window.open(url, "_blank");
+};
+
+const handleUpload = async (files, path) => {
+    if (!props.provider?.id) {
+        showMessage("Provider information is missing", "error");
+        return;
+    }
+
+    try {
+        const formData = new FormData();
+        formData.append("path", path);
+        for (let i = 0; i < files.length; i++) {
+            formData.append("files[]", files[i]);
+        }
+
+        const response = await axios.post(`/file-manager/${props.provider.id}/upload`, formData, {
+            headers: {
+                "Content-Type": "multipart/form-data",
+            },
+        });
+
+        showMessage(response.data.message);
+        navigateTo(path);
+    } catch (error) {
+        showMessage(`Failed to upload files: ${error.message}`, "error");
+        console.error("Upload Error:", error);
+    }
 };
 
 const handleDelete = async () => {
@@ -178,6 +206,15 @@ watch(currentPath, (newPath) => {
                     </button>
                 </template>
             </ConfirmationModal>
+
+            <!-- Upload Modal -->
+            <UploadModal 
+                :show="showUploadModal" 
+                :provider="provider"
+                :current-path="currentPath"
+                @close="showUploadModal = false" 
+                @uploaded="navigateTo" />
+
         </main>
     </AppLayout>
 </template>
