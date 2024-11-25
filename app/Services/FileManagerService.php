@@ -105,40 +105,58 @@ class FileManagerService
      * @return array An array containing the success status, file path, and metadata.
      * @throws \RuntimeException If the file upload fails.
      */
-    public function uploadFile($file, string $path, array $options = [])
+    public function uploadFile($files, string $path, array $options = [])
     {
+        if (!$this->filesystem) {
+            $this->filesystem = $this->getFileSystem();
+        }
+
+        if (!is_array($files)) {
+            $files = [$files];
+        }
+
         try {
-            $stream = fopen($file->getRealPath(), 'r+');
-            $filename = $options['filename'] ?? $file->getClientOriginalName();
-            $fullPath = trim($path . '/' . $filename, '/');
 
-            // Generate metadata
-            $metadata = [
-                'mime_type' => $file->getMimeType(),
-                'size' => $file->getSize(),
-                'original_name' => $file->getClientOriginalName(),
-                'uploaded_at' => now(),
-            ];
+            foreach ($files as $file) {
+                $stream = fopen($file->getRealPath(), 'r+');
+                if (!$stream) {
+                    throw new \RuntimeException('Unable to open file stream.');
+                }
 
-            // Upload file with metadata
-            $this->filesystem->writeStream($fullPath, $stream, [
-                'metadata' => $metadata,
-                'visibility' => $options['visibility'] ?? 'private',
-            ]);
+                $filename = $options['filename'] ?? $file->getClientOriginalName();
+                $fullPath = trim($path . '/' . $filename, '/');
 
-            if (is_resource($stream)) {
-                fclose($stream);
+                // Generate metadata
+                $metadata = [
+                    'mime_type' => $file->getMimeType(),
+                    'size' => $file->getSize(),
+                    'original_name' => $file->getClientOriginalName(),
+                    'uploaded_at' => now(),
+                ];
+
+                // Upload file with metadata
+                $this->filesystem->writeStream($fullPath, $stream, [
+                    'metadata' => $metadata,
+                    'visibility' => $options['visibility'] ?? 'private',
+                ]);
+
+                if (is_resource($stream)) {
+                    fclose($stream);
+                }
+
             }
-
+    
             return [
                 'success' => true,
                 'path' => $fullPath,
                 'metadata' => $metadata,
             ];
         } catch (\Exception $e) {
+            \Log::error('File upload failed', ['error' => $e->getMessage()]);
             throw new \RuntimeException("Failed to upload file: {$e->getMessage()}");
         }
     }
+    
 
     /**
      * Download a file from the filesystem.
