@@ -199,11 +199,14 @@ class FileManagerController extends Controller
      *
      * @throws \RuntimeException If an error occurs while uploading the file.
      */
-    public function upload(Request $request)
+    public function upload(Request $request, StorageProvider $provider = null, $path = null)
     {
-        $providerId = $request->input('provider_id');
-        $file = $request->file('file');
-        $path = $request->input('path', '');
+        $providerId = $provider ? $provider->id : $request->route('provider');
+        $files = $request->file('files');
+        $path = $request->route('path', '');
+
+        // dd($files);
+        // exit;
 
         $provider = StorageProvider::find($providerId);
 
@@ -217,15 +220,20 @@ class FileManagerController extends Controller
         $this->fileManagerService->setProvider($provider);
 
         try {
-            $this->fileManagerService->uploadFile($file, $path);
+
+            foreach ($files as $file) {
+                $this->fileManagerService->uploadFile($file, $path);
+            }
+
             return response()->json([
                 'success' => true,
-                'message' => 'File uploaded successfully.',
+                'message' => 'Files uploaded successfully.',
             ]);
-        } catch (\RuntimeException $e) {
+        } catch (FilesystemException $e) {
+            Log::error('File upload failed', ['error' => $e->getMessage(), 'path' => $path, 'file_name' => $file->getClientOriginalName()]);
             return response()->json([
                 'success' => false,
-                'error' => $e->getMessage(),
+                'error' => 'File upload failed. Please try again.',
             ], 500);
         }
     }
