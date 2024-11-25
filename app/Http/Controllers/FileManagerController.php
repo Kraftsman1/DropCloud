@@ -202,38 +202,45 @@ class FileManagerController extends Controller
     public function upload(Request $request, StorageProvider $provider = null, $path = null)
     {
         $providerId = $provider ? $provider->id : $request->route('provider');
-        $files = $request->file('files');
         $path = $request->route('path', '');
-
-        // dd($files);
-        // exit;
-
+    
         $provider = StorageProvider::find($providerId);
-
+    
         if (!$provider) {
             return response()->json([
                 'success' => false,
                 'error' => 'Storage provider not found.',
             ], 404);
         }
-
+    
         $this->fileManagerService->setProvider($provider);
-
+    
         try {
-
+            // Handle both single and multiple file uploads
+            $files = $request->file('files');
+            
+            // Ensure $files is always an array
+            $files = is_array($files) ? $files : [$files];
+    
+            $uploadedFiles = [];
             foreach ($files as $file) {
-                $this->fileManagerService->uploadFile($file, $path);
+                $uploadedFiles[] = $this->fileManagerService->uploadFile($file, $path);
             }
-
+    
             return response()->json([
                 'success' => true,
-                'message' => 'Files uploaded successfully.',
+                'message' => count($uploadedFiles) . ' file(s) uploaded successfully.',
+                'uploads' => $uploadedFiles
             ]);
-        } catch (FilesystemException $e) {
-            Log::error('File upload failed', ['error' => $e->getMessage(), 'path' => $path, 'file_name' => $file->getClientOriginalName()]);
+        } catch (\Exception $e) {
+            Log::error('File upload failed', [
+                'error' => $e->getMessage(), 
+                'path' => $path
+            ]);
+            
             return response()->json([
                 'success' => false,
-                'error' => 'File upload failed. Please try again.',
+                'error' => 'File upload failed: ' . $e->getMessage(),
             ], 500);
         }
     }
