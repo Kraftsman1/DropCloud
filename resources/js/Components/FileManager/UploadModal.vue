@@ -18,7 +18,7 @@ const props = defineProps({
     },
 });
 
-const emit = defineEmits(["close", "uploaded"]);
+const emit = defineEmits(["close", "uploaded", "response"]);
 
 // State management
 const dragOver = ref(false);
@@ -144,6 +144,12 @@ const removeFile = (fileToRemove) => {
 };
 
 const handleUpload = async () => {
+
+    if (!props.provider?.id) {
+        state.errorMessages.push("Provider information is missing");
+        return;
+    }
+
     if (!state.files.length) return;
 
     uploading.value = true;
@@ -155,13 +161,14 @@ const handleUpload = async () => {
         formData.append("providerId", props.provider.id);
         formData.append("path", props.currentPath || '/');
 
+
         state.files.forEach((fileObj) => {
             formData.append("files[]", fileObj.file);
             // Initialize progress for each file
             state.uploadProgress[fileObj.file.name] = 0;
         });
 
-        const response = await axios.post(`/file-manager/${props.provider.id}/upload`, formData, {
+        const response = await axios.post(`/file-manager/${props.provider.id}/upload/${props.currentPath}`, formData, {
             headers: {
                 "Content-Type": "multipart/form-data",
             },
@@ -177,6 +184,7 @@ const handleUpload = async () => {
 
         state.files = [];
         emit("uploaded", props.currentPath);
+        emit("response", response.data.message);
         emit("close");
     } catch (error) {
         const errorMessage = error.response?.data?.error 
