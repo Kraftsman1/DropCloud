@@ -252,55 +252,56 @@ const overallUploadProgress = computed(() => {
                 </div>
 
                 <!-- Selected Files List -->
-                <div v-if="state.files.length" class="text-left mt-4">
-                    <div class="flex justify-between items-center mb-2">
-                        <h3 class="font-semibold">Selected Files:</h3>
-                        <span class="text-xs text-gray-500">
-                            {{ state.files.length }}/{{ MAX_FILES }}
-                            ({{ (totalFileSize / (1024 * 1024)).toFixed(2) }}MB)
-                        </span>
-                    </div>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-2 max-h-60 overflow-y-auto">
-                        <div v-for="fileObj in state.files" :key="fileObj.file.name"
-                            class="flex items-center bg-gray-100 p-2 rounded">
-                            <!-- File Preview -->
-                            <div class="mr-2">
-                                <img v-if="fileObj.preview" :src="fileObj.preview" 
-                                    class="w-12 h-12 object-cover rounded" />
-                                <ImageIcon v-else class="w-12 h-12 text-gray-400" />
-                            </div>
+<!-- Selected Files List -->
+<div v-if="state.files.length" class="text-left mt-4">
+    <div class="flex justify-between items-center mb-2">
+        <h3 class="font-semibold">Selected Files:</h3>
+        <span class="text-xs text-gray-500">
+            {{ state.files.length }}/{{ MAX_FILES }}
+            ({{ (totalFileSize / (1024 * 1024)).toFixed(2) }}MB)
+        </span>
+    </div>
+    <div class="grid grid-cols-1 gap-2 max-h-60 overflow-y-auto">
+        <div v-for="fileObj in state.files" :key="fileObj.file.name"
+            class="flex items-center bg-gray-100 p-2 rounded">
+            <!-- File Preview -->
+            <div class="mr-3 flex-shrink-0">
+                <img v-if="fileObj.preview" :src="fileObj.preview" 
+                    class="w-12 h-12 object-cover rounded" />
+                <ImageIcon v-else class="w-12 h-12 text-gray-400" />
+            </div>
 
-                            <div class="flex-grow">
-                                <div class="flex justify-between items-center">
-                                    <span class="text-sm truncate max-w-[70%]">
-                                        {{ fileObj.file.name }}
-                                    </span>
-                                    <button @click="removeFile(fileObj)" 
-                                        class="text-red-500 hover:text-red-700"
-                                        aria-label="Remove file">
-                                        <Trash2Icon class="w-4 h-4" />
-                                    </button>
-                                </div>
-                                
-                                <!-- Upload Progress -->
-                                <div v-if="uploading" class="w-full bg-gray-200 rounded-full h-1.5 mt-1">
-                                    <div class="bg-blue-600 h-1.5 rounded-full" 
-                                        :style="{width: `${state.uploadProgress[fileObj.file.name] || 0}%`}">
-                                    </div>
-                                </div>
-
-                                <div class="text-xs text-gray-500 flex justify-between">
-                                    <span>
-                                        {{ ALLOWED_TYPES[fileObj.file.type] || 'Unknown' }}
-                                    </span>
-                                    <span>
-                                        {{ (fileObj.file.size / 1024).toFixed(1) }}KB
-                                    </span>
-                                </div>
-                            </div>
-                        </div>
+            <div class="flex-grow overflow-hidden">
+                <div class="flex items-center justify-between">
+                    <span class="text-sm truncate pr-2">
+                        {{ fileObj.file.name }}
+                    </span>
+                    <button @click="removeFile(fileObj)" 
+                        class="text-red-500 hover:text-red-700 ml-2"
+                        aria-label="Remove file">
+                        <Trash2Icon class="w-4 h-4" />
+                    </button>
+                </div>
+                
+                <!-- Upload Progress -->
+                <div v-if="uploading" class="w-full bg-gray-200 rounded-full h-1.5 mt-1">
+                    <div class="bg-blue-600 h-1.5 rounded-full" 
+                        :style="{width: `${state.uploadProgress[fileObj.file.name] || 0}%`}">
                     </div>
                 </div>
+
+                <div class="text-xs text-gray-500 flex justify-between mt-0.5">
+                    <span class="truncate pr-2">
+                        {{ ALLOWED_TYPES[fileObj.file.type] || 'Unknown' }}
+                    </span>
+                    <span class="flex-shrink-0">
+                        {{ (fileObj.file.size / 1024).toFixed(1) }}KB
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
                 <!-- Overall Upload Progress -->
                 <div v-if="uploading" class="mt-4">
