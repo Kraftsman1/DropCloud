@@ -53,7 +53,7 @@ Route::middleware([
         Route::get('/{provider}/{path?}', [FileManagerController::class, 'index'])->name('file-manager.index');
         Route::get('/{provider}/download/{path}', [FileManagerController::class, 'download'])->name('file-manager.download')->where('path', '.*');
         Route::delete('/{provider}/delete/{path}', [FileManagerController::class, 'delete'])->name('file-manager.delete')->where('path', '.*');
-        Route::post('/{provider}/upload', [FileManagerController::class, 'upload'])->name('file-manager.upload');
+        Route::post('/{provider}/upload/{path?}', [FileManagerController::class, 'upload'])->name('file-manager.upload');
     });
 
 });

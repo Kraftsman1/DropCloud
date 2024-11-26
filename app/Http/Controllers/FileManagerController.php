@@ -217,6 +217,9 @@ class FileManagerController extends Controller
     
         try {
             // Handle both single and multiple file uploads
+            $files = $request->validate([
+                'files.*' => 'max:100000',
+            ]);
             $files = $request->file('files');
             
             // Ensure $files is always an array
@@ -224,7 +227,9 @@ class FileManagerController extends Controller
     
             $uploadedFiles = [];
             foreach ($files as $file) {
-                $uploadedFiles[] = $this->fileManagerService->uploadFile($file, $path);
+                $uploadedFile= $this->fileManagerService->uploadFile($file, $path);
+
+                $uploadedFiles[] = $uploadedFile;
             }
     
             return response()->json([
