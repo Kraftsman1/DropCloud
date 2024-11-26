@@ -148,43 +148,33 @@ const handleUpload = async () => {
 
     uploading.value = true;
     state.errorMessages = [];
+    state.uploadProgress = {}; // Reset progress
 
     try {
         const formData = new FormData();
         formData.append("providerId", props.provider.id);
         formData.append("path", props.currentPath || '/');
 
-        // Explicitly use file property and ensure correct file object
-        state.files.forEach((fileObj, index) => {
-            console.log(`Adding file ${index}:`, {
-                name: fileObj.file.name,
-                type: fileObj.file.type,
-                size: fileObj.file.size
-            });
+        state.files.forEach((fileObj) => {
             formData.append("files[]", fileObj.file);
+            // Initialize progress for each file
+            state.uploadProgress[fileObj.file.name] = 0;
         });
-
-        // Debug: Log FormData contents
-        for (let [key, value] of formData.entries()) {
-            console.log(`FormData - ${key}:`, value);
-        }
 
         const response = await axios.post(`/file-manager/${props.provider.id}/upload`, formData, {
             headers: {
                 "Content-Type": "multipart/form-data",
             },
-            // Add more detailed logging
-            transformRequest: [function (data, headers) {
-                console.log('Request Data:', data);
-                return data;
-            }]
-            
+            onUploadProgress: (progressEvent) => {
+                const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+                
+                // Update overall progress for each file
+                state.files.forEach(fileObj => {
+                    state.uploadProgress[fileObj.file.name] = percentCompleted;
+                });
+            }
         });
-        
-        // Debug: Log response data
-        console.log('Upload Response:', response.data);
 
-        // Handle successful upload
         state.files = [];
         emit("uploaded", props.currentPath);
         emit("close");
@@ -195,17 +185,13 @@ const handleUpload = async () => {
             || 'Unknown upload error';
 
         state.errorMessages.push(`Upload failed: ${errorMessage}`);
-        
-        console.error('Upload Error Details:', {
-            status: error.response?.status,
-            data: error.response?.data,
-            message: errorMessage,
-            url: error.config?.url
-        });
+        console.error('Upload Error:', error);
     } finally {
         uploading.value = false;
+        state.uploadProgress = {};
     }
 };
+
 // Computed properties
 const totalFileSize = computed(() =>
     state.files.reduce((total, fileObj) => total + fileObj.file.size, 0)
