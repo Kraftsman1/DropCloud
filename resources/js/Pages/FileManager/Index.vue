@@ -26,7 +26,7 @@ const props = defineProps({
 });
 
 // State Management
-const currentPath = ref(props.contents?.path || "/");
+const currentPath = ref(props.contents?.data?.path || "/");
 const currentContents = ref(props.contents);
 const selectedItems = ref([]);
 const actionMessage = ref(null);
@@ -64,33 +64,6 @@ const download = (path) => {
     window.open(url, "_blank");
 };
 
-const handleUpload = async (files, path) => {
-    if (!props.provider?.id) {
-        showMessage("Provider information is missing", "error");
-        return;
-    }
-
-    try {
-        const formData = new FormData();
-        formData.append("path", path);
-        for (let i = 0; i < files.length; i++) {
-            formData.append("files[]", files[i]);
-        }
-
-        const response = await axios.post(`/file-manager/${props.provider.id}/upload`, formData, {
-            headers: {
-                "Content-Type": "multipart/form-data",
-            },
-        });
-
-        showMessage(response.data.message);
-        navigateTo(path);
-    } catch (error) {
-        showMessage(`Failed to upload files: ${error.message}`, "error");
-        console.error("Upload Error:", error);
-    }
-};
-
 const handleDelete = async () => {
     if (!activeItem.value || !props.provider?.id) {
         showMessage("No item selected or provider information missing.", "error");
@@ -122,6 +95,15 @@ const handleDelete = async () => {
         isDeleting.value = false;
         activeItem.value = null;
     }
+};
+
+const handleUploadSuccess = (response) => {
+    showMessage(response);
+    navigateTo(currentPath.value);
+};
+
+const handleSuccessResponse = (response) => {
+    showMessage(response);
 };
 
 const confirmDelete = (item) => {
@@ -211,9 +193,10 @@ watch(currentPath, (newPath) => {
             <UploadModal 
                 :show="showUploadModal" 
                 :provider="provider"
-                :current-path="currentPath"
+                :currentPath="currentPath"
                 @close="showUploadModal = false" 
-                @uploaded="navigateTo" />
+                @uploaded="handleUploadSuccess"
+                @response="handleSuccessResponse" />
 
         </main>
     </AppLayout>
