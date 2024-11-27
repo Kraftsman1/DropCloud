@@ -87,6 +87,7 @@ class FileManagerService
                 'data' => [
                     'files' => $files,
                     'folders' => $folders,
+                    'path' => $path,
                 ],
             ];
         } catch (\Exception $e) {
