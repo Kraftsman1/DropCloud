@@ -1,5 +1,4 @@
 <script setup>
-import { defineProps } from "vue";
 import { Link } from "@inertiajs/vue3";
 import AppLayout from "@/Layouts/AppLayout.vue";
 import {
@@ -14,7 +13,22 @@ import {
 const props = defineProps({
     folders: Array,
     files: Array,
+    storageProviderCount: {
+        type: Number,
+        default: 0,
+    },
+    drivers: {
+        type: Array,
+        default: () => [],
+    },
+    teamCount: {
+        type: Number,
+        default: 0,
+    },
+
 });
+
+console.log(props);
 
 const getFileTypeIcon = (type) => {
     switch (type) {
@@ -92,7 +106,7 @@ const formatDate = (dateString) => {
                                 <dd
                                     class="mt-1 text-3xl font-semibold text-gray-900"
                                 >
-                                    7
+                                    {{ props.teamCount }}
                                 </dd>
                                 <div class="mt-1 text-sm text-gray-500">
                                     +2 new this week
@@ -110,10 +124,10 @@ const formatDate = (dateString) => {
                                 <dd
                                     class="mt-1 text-3xl font-semibold text-gray-900"
                                 >
-                                    3
+                                    {{ props.storageProviderCount }}
                                 </dd>
                                 <div class="mt-1 text-sm text-gray-500">
-                                    AWS S3, GCS, Azure
+                                    {{ props.drivers.toString() }}
                                 </div>
                             </div>
                         </div>
