@@ -11,8 +11,14 @@ import {
 } from "lucide-vue-next";
 
 const props = defineProps({
-    folders: Array,
-    files: Array,
+    folders: {
+        type: Array,
+        default: () => [],
+    },
+    files: {
+        type: Array,
+        default: () => [],
+    },
     storageProviderCount: {
         type: Number,
         default: 0,
