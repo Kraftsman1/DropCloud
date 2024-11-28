@@ -6,6 +6,7 @@ use Inertia\Inertia;
 
 use App\Http\Controllers\StorageProviderController;
 use App\Http\Controllers\FileManagerController;
+use App\Http\Controllers\DashboardController;
 
 /*
 |--------------------------------------------------------------------------
@@ -32,10 +33,9 @@ Route::middleware([
     config('jetstream.auth_session'),
     'verified',
 ])->group(function () {
-    Route::get('/dashboard', function () {
-        return Inertia::render('Dashboard');
-    })->name('dashboard');
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
+    
     // Storage Provider Route Group
     Route::prefix('storage-providers')->group(function () {
         Route::get('/', [StorageProviderController::class, 'index'])->name('storage-providers.index');
