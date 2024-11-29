@@ -1,3 +1,21 @@
+<script setup>
+import AppLayout from '@/Layouts/AppLayout.vue'
+import ProviderList from '@/Components/StorageProviders/ProviderList.vue'
+
+const props = defineProps({
+    providers: {
+        type: Array,
+        required: true
+    }
+})
+
+const deleteProvider = (id) => {
+    if (confirm('Are you sure you want to delete this provider?')) {
+        $inertia.delete(route('storage-providers.destroy', id))
+    }
+}
+
+</script>
 <template>
     <AppLayout>
         <template #header>
@@ -20,25 +38,3 @@
         </div>
     </AppLayout>
 </template>
-
-<script>
-import AppLayout from '@/Layouts/AppLayout.vue'
-import ProviderList from '@/Components/StorageProviders/ProviderList.vue'
-
-export default {
-    components: {
-        AppLayout,
-        ProviderList
-    },
-    props: {
-        providers: Array
-    },
-    methods: {
-        deleteProvider(id) {
-            if (confirm('Are you sure you want to delete this provider?')) {
-                this.$inertia.delete(route('storage-providers.destroy', id))
-            }
-        }
-    }
-}
-</script>
