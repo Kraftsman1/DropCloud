@@ -16,8 +16,13 @@ class DashboardController extends Controller
             // Get authenticated user id
             $userId = Auth::id(); 
 
-            // Get storage provider count
-            $storageProviders = StorageProvider::where('user_id', $userId)->get();
+            // Get current team
+            $team = Auth::user()->currentTeam;
+
+            // Get storage providers by user id and team id
+            $storageProviders = StorageProvider::where('user_id', $userId)
+                ->where('team_id', $team->id)
+                ->get();
 
             $count = $storageProviders->count();
 
