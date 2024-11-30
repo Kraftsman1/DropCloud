@@ -1,3 +1,12 @@
+<script setup>
+import AppLayout from '@/Layouts/AppLayout.vue'
+import ProviderForm from '@/Components/StorageProviders/ProviderForm.vue'
+
+const createProvider = (formData) => {
+    $inertia.post(route('storage-providers.store'), formData)
+}
+
+</script>
 <template>
     <app-layout>
         <template #header>
@@ -15,20 +24,3 @@
         </div>
     </app-layout>
 </template>
-
-<script>
-import AppLayout from '@/Layouts/AppLayout.vue'
-import ProviderForm from '@/Components/StorageProviders/ProviderForm.vue'
-
-export default {
-    components: {
-        AppLayout,
-        ProviderForm
-    },
-    methods: {
-        createProvider(formData) {
-            this.$inertia.post(route('storage-providers.store'), formData)
-        }
-    }
-}
-</script>
