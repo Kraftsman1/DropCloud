@@ -32,6 +32,7 @@ const deleteProvider = (id) => {
                         Add New Provider
                     </inertia-link>
 
+                    <p v-if="providers.length === 0" class="text-gray-600">No storage providers found.</p>
                     <ProviderList :providers="providers" @delete="deleteProvider" />
                 </div>
             </div>
