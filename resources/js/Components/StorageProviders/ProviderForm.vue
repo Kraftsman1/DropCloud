@@ -1,3 +1,55 @@
+<script setup>
+import { ref } from "vue";
+
+const props = defineProps({
+    provider: {
+        type: Object,
+        required: true,
+        default: () => ({
+            label: "",
+            name: "",
+            configuration: {
+                driver: "local",
+            },
+        }),
+    },
+    submitButtonText: {
+        type: String,
+        default: "Save",
+    },
+});
+
+const emit = defineEmits(["submitted"]);
+const form = ref({ ...props.provider });
+const testResponse = ref(null);
+const isTestingConnection = ref(false);
+
+const submit = () => {
+    emit("submitted", form.value);
+
+    window.location.href = route("storage-providers.index");
+};
+
+const testConnection = async () => {
+    testResponse.value = null;
+    try {
+        isTestingConnection.value = true;
+        const response = await axios.post(
+            `/storage-providers/test-connection`,
+            form.value.configuration
+        );
+        testResponse.value = response.data;
+    } catch (error) {
+        testResponse.value = {
+            success: false,
+            message: error.response?.data?.message || "An error occurred.",
+        };
+    } finally {
+        isTestingConnection.value = false;
+    }
+};
+</script>
+
 <template>
     <form @submit.prevent="submit">
         <div>
@@ -59,55 +111,3 @@
         </p>
     </div>
 </template>
-
-<script>
-export default {
-    props: {
-        provider: {
-            type: Object,
-            default: () => ({
-                label: "",
-                name: "",
-                configuration: {
-                    driver: "local",
-                },
-            }),
-        },
-        submitButtonText: {
-            type: String,
-            default: "Save",
-        },
-    },
-    data() {
-        return {
-            form: this.provider,
-            testResponse: null,
-            isTestingConnection: false,
-        };
-    },
-    methods: {
-        submit() {
-            this.$emit("submitted", this.form);
-        },
-        async testConnection() {
-            this.testResponse = null;
-            console.log(this.form.configuration);
-            try {
-                this.isTestingConnection = true;
-                const response = await axios.post(
-                    `/storage-providers/test-connection`,
-                    this.form.configuration
-                );
-                this.testResponse = response.data;
-            } catch (error) {
-                this.testResponse = {
-                    success: false,
-                    message: error.response.data.message,
-                };
-            } finally {
-                this.isTestingConnection = false;
-            }
-        },
-    },
-};
-</script>
