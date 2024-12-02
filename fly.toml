@@ -23,11 +23,9 @@ console_command = 'php /var/www/html/artisan tinker'
   MAIL_MAILER = 'smtp'
   MAIL_HOST = 'smtp.mailgun.org'
   MAIL_PORT = '587'
-  MAIL_USERNAME = '${MAILGUN_SMTP_USERNAME}'
-  MAIL_PASSWORD = '${MAILGUN_SMTP_PASSWORD}'
   MAIL_ENCRYPTION = 'tls'
   MAIL_FROM_ADDRESS = 'hello@dropcloud.com'
-  MAIL_FROM_NAME = '${APP_NAME}'
+  MAIL_FROM_NAME = 'Dropcloud'	
 
 [http_service]
   internal_port = 8080
