@@ -4,13 +4,11 @@ namespace App\Services;
 
 use App\Models\StorageProvider;
 use Illuminate\Support\Facades\Storage;
-use League\Flysystem\Filesystem;
-
 use Illuminate\Support\Collection;
-use League\Flysystem\StorageAttributes;
 use Illuminate\Http\UploadedFile;
-
-
+use Illuminate\Support\Facades\Log;
+use League\Flysystem\Filesystem;
+use League\Flysystem\StorageAttributes;
 
 class FileManagerService
 {
@@ -167,16 +165,36 @@ class FileManagerService
     public function downloadFile(string $path)
     {
         try {
+            // Log additional information for debugging
+            Log::info('Attempting to download file', [
+                'path' => $path,
+                'filesystem' => get_class($this->filesystem),
+                'file_exists' => $this->filesystem->fileExists($path),
+            ]);
+
             if (!$this->filesystem->fileExists($path)) {
+                Log::error('File not found', ['path' => $path]);
                 throw new \RuntimeException("File not found: {$path}");
             }
 
+            $stream = $this->filesystem->readStream($path);
+
+            if ($stream === false) {
+                Log::error('Failed to read file stream', ['path' => $path]);
+                throw new \RuntimeException("Failed to read file stream: {$path}");
+            }
+
             return [
-                'stream' => $this->filesystem->readStream($path),
+                'stream' => $stream,
                 'mime_type' => $this->filesystem->mimeType($path),
                 'size' => $this->filesystem->fileSize($path),
             ];
         } catch (\Exception $e) {
+            Log::error('Download file error', [
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+                'path' => $path,
+            ]);
             throw new \RuntimeException("Failed to download file: {$e->getMessage()}");
         }
     }
