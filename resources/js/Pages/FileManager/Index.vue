@@ -7,7 +7,7 @@ import AppLayout from "@/Layouts/AppLayout.vue";
 import FileContentList from "@/Components/FileManager/FileContentList.vue";
 import UploadModal from "@/Components/FileManager/UploadModal.vue";
 import ConfirmationModal from "@/Components/ConfirmationModal.vue";
-import ActionMessage from "@/Components/ActionMessage.vue";
+import ActionNotification from "@/Components/ActionNotification.vue";
 
 // Props
 const props = defineProps({
@@ -29,7 +29,7 @@ const props = defineProps({
 const currentPath = ref(props.contents?.data?.path || "/");
 const currentContents = ref(props.contents);
 const selectedItems = ref([]);
-const actionMessage = ref(null);
+const actionNotification = ref(null);
 const isLoading = ref(false);
 const isDeleting = ref(false);
 
@@ -43,11 +43,11 @@ const activeItem = ref(null);
 
 // Helper Functions
 const showMessage = (text, type = "success") => {
-    actionMessage.value = { text, type };
+    actionNotification.value = { text, type };
 };
 
 const clearMessage = () => {
-    actionMessage.value = null;
+    actionNotification.value = null;
 };
 
 const navigateTo = (path) => {
@@ -151,7 +151,7 @@ watch(currentPath, (newPath) => {
             </div>
 
             <!-- Action Message -->
-            <ActionMessage v-if="actionMessage" :message="actionMessage.text" :type="actionMessage.type"
+            <ActionNotification v-if="actionNotification" :message="actionNotification.text" :type="actionNotification.type"
                 @close="clearMessage" />
 
             <!-- Loading State -->
