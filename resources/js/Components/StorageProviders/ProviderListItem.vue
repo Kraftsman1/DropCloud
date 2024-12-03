@@ -15,7 +15,7 @@ const props = defineProps({
         <div class="px-6 py-4">
             <h3 class="text-xl font-bold mb-2">{{ provider.label }}</h3>
             <p class="text-gray-700 text-base">{{ provider.name }}</p>
-            <p class="text-gray-600 text-sm">Driver: {{ provider.configuration.driver }}</p>
+            <p class="text-gray-600 text-sm">Driver: {{ provider.driver }}</p>
         </div>
         <div class="px-6 pt-4 pb-2 flex justify-between">
             <Link :href="route('file-manager.index', { provider: provider.id, path: '' })" class="text-indigo-600 hover:text-indigo-900">View</Link>
