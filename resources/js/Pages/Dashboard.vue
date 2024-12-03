@@ -34,8 +34,6 @@ const props = defineProps({
 
 });
 
-console.log(props);
-
 const getFileTypeIcon = (type) => {
     switch (type) {
         case "document":
