@@ -5,10 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\File;
 use App\Models\StorageProvider;
 use App\Services\FileManagerService;
-
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
-
 use Inertia\Inertia;
 
 class FileManagerController extends Controller
@@ -110,7 +108,7 @@ class FileManagerController extends Controller
     {
 
         $providerId = $provider ? $provider->id : $request->route('provider');
-        $path = $request->route('path');
+        $path = urldecode($request->route('path'));
 
         $provider = StorageProvider::find($providerId);
 
@@ -125,8 +123,18 @@ class FileManagerController extends Controller
 
         try {
             $file = $this->fileManagerService->downloadFile($path);
+
+            // Validate the file stream before streaming
+            if(!is_resource($file['stream'])) {
+                throw new \RuntimeException('Invalid file stream.');
+            }
+
             return response()->streamDownload(function () use ($file) {
-                fpassthru($file['stream']);
+                // Attempt to output stream with error handling
+                if (fpassthru($file['stream']) === false) {
+                    throw new \RuntimeException('Failed to output file stream.');
+                }
+
                 // ensure stream is closed after download
                 fclose($file['stream']);
             }, basename($path), [
@@ -134,6 +142,10 @@ class FileManagerController extends Controller
                 'Content-Length' => $file['size'],
             ]);
         } catch (\RuntimeException $e) {
+            Log::error('File download failed', [
+                'error' => $e->getMessage(), 
+                'path' => $path
+            ]);
             return response()->json([
                 'success' => false,
                 'error' => $e->getMessage(),
