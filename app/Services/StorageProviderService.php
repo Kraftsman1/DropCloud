@@ -137,8 +137,20 @@ class StorageProviderService
         // Get the user's current team ID
         $currentTeamId = $user->current_team_id;
 
-        // Retrieve providers associated with both the user and their current team
-        return StorageProvider::where('team_id', $currentTeamId)->get();
+        // Retrieve providers associated with both the user and their current team. Include only the name, label, and driver in the response.
+        $response = StorageProvider::where('team_id', $currentTeamId)->get();
+
+        $providers = $response->map(function ($provider) {
+            return [
+                'id' => $provider->id,
+                'name' => $provider->name,
+                'label' => $provider->label,
+                'driver' => $provider->configuration['driver'] ?? null,
+            ];
+        });
+
+        return $providers->toArray();
+        
 
     }
 
