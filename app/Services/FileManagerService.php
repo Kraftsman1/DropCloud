@@ -9,8 +9,6 @@ use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Log;
 use League\Flysystem\Filesystem;
 use League\Flysystem\StorageAttributes;
-use GuzzleHttp\Client;
-use GuzzleHttp\Exception\GuzzleException;
 
 class FileManagerService
 {
@@ -173,38 +171,23 @@ class FileManagerService
                 'filesystem' => get_class($this->filesystem),
                 'file_exists' => $this->filesystem->fileExists($path),
             ]);
-    
+
             if (!$this->filesystem->fileExists($path)) {
                 Log::error('File not found', ['path' => $path]);
                 throw new \RuntimeException("File not found: {$path}");
             }
-    
-            // Generate a temporary URL if working with S3
-            $temporaryUrl = $this->filesystem->temporaryUrl($path, now()->addMinutes(5));
-    
-            // Use Guzzle to fetch the file
-            $client = new Client();
-            $response = $client->request('GET', $temporaryUrl, [
-                'stream' => true, // Important for large files
-                'timeout' => 30.0 // Adjust timeout as needed
-            ]);
-    
-            // Check if the response is successful
-            if ($response->getStatusCode() !== 200) {
-                Log::error('Failed to download file', [
-                    'status_code' => $response->getStatusCode(),
-                    'path' => $path
-                ]);
-                throw new \RuntimeException("Failed to download file: HTTP {$response->getStatusCode()}");
+
+            $stream = $this->filesystem->readStream($path);
+
+            if ($stream === false) {
+                Log::error('Failed to read file stream', ['path' => $path]);
+                throw new \RuntimeException("Failed to read file stream: {$path}");
             }
-    
-            // Get the body as a stream
-            $stream = $response->getBody();
-    
+
             return [
                 'stream' => $stream,
                 'mime_type' => $this->filesystem->mimeType($path),
-                'size' => $response->getHeaderLine('Content-Length') ?: $this->filesystem->fileSize($path),
+                'size' => $this->filesystem->fileSize($path),
             ];
         } catch (\Exception $e) {
             Log::error('Download file error', [

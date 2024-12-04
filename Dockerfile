@@ -22,12 +22,12 @@ ENV DEBIAN_FRONTEND=noninteractive \
     PHP_MAX_EXECUTION_TIME=90 \
     PHP_POST_MAX_SIZE=100M \
     PHP_UPLOAD_MAX_FILE_SIZE=100M \
-    PHP_ALLOW_URL_FOPEN=Off
+    PHP_ALLOW_URL_FOPEN=On
 
 # Install base dependencies first
 RUN apt-get update \
     && apt-get install -y --no-install-recommends gnupg2 ca-certificates git-core curl zip unzip \
-                                                  rsync vim-tiny htop sqlite3 nginx supervisor cron \
+    rsync vim-tiny htop sqlite3 nginx supervisor cron \
     && ln -sf /usr/bin/vim.tiny /etc/alternatives/vim \
     && ln -sf /etc/alternatives/vim /usr/bin/vim
 
@@ -82,23 +82,23 @@ COPY --from=base /var/www/html/vendor ./vendor
 
 # Install and build assets
 RUN if [ -f "vite.config.js" ]; then \
-        ASSET_CMD="build"; \
+    ASSET_CMD="build"; \
     else \
-        ASSET_CMD="production"; \
+    ASSET_CMD="production"; \
     fi; \
     if [ -f "yarn.lock" ]; then \
-        yarn install --frozen-lockfile; \
-        yarn $ASSET_CMD; \
+    yarn install --frozen-lockfile; \
+    yarn $ASSET_CMD; \
     elif [ -f "pnpm-lock.yaml" ]; then \
-        corepack enable && corepack prepare pnpm@latest-8 --activate; \
-        pnpm install --frozen-lockfile; \
-        pnpm run $ASSET_CMD; \
+    corepack enable && corepack prepare pnpm@latest-8 --activate; \
+    pnpm install --frozen-lockfile; \
+    pnpm run $ASSET_CMD; \
     elif [ -f "package-lock.json" ]; then \
-        npm ci --no-audit; \
-        npm run $ASSET_CMD; \
+    npm ci --no-audit; \
+    npm run $ASSET_CMD; \
     else \
-        npm install; \
-        npm run $ASSET_CMD; \
+    npm install; \
+    npm run $ASSET_CMD; \
     fi;
 
 # Final stage
